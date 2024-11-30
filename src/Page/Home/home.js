@@ -57,7 +57,7 @@ const HomePage = () => {
                   key={book.id} // ID sách
                   id={book.id}
                   title={book.title}
-                  image={book.url}
+                  image={book.image_url}
                   price={book.price}
                 />
               ))}

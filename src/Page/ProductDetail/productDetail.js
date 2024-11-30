@@ -121,15 +121,17 @@ const BookDetails = () => {
         <div className="book-details">
           <div className="row">
             <div className="col-lg-3">
-              <img src={book.url} alt={book.title} className="book-image" />
+              <img src={book.image_url} alt={book.title} className="book-image" />
             </div>
             <div className="col-lg-6">
               <div className="book-infor">
                 <h1>{book.title}</h1>
-                <p>Tác giả: {book.author}</p>
-                <p>Nhà xuất bản: {book.publisher}</p>
                 <p>Thể loại: {book.category}</p>
+                <p>Lớp: {book.level_class}</p>
+                <p>Trường: {book.level_school}</p>
+                <p>Tác giả: {book.author}</p>
                 <p>Ngày xuất bản: {new Date(book.publication_date).toLocaleDateString()}</p>
+                <p>Nhà xuất bản: {book.publisher}</p>
                 <p>
                   Số lượng:
                   <span className={book.stock_quantity > 0 ? "" : "het-hang"}>
@@ -196,7 +198,7 @@ const BookDetails = () => {
                   key={book.id} // ID sách
                   id={book.id}
                   title={book.title}
-                  image={book.url}
+                  image={book.image_url}
                   price={book.price}
                   width={150}
                   height={290}
