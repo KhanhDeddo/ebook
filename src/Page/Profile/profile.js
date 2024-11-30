@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ROUTER } from "../../Utils/router";
 import "./profile.scss";
 import { NavBar } from "../../Components/Navbar/navbar";
+import axios from "axios";
 
 export const Profile = () => {
     const [user, setUser] = useState(null);
@@ -26,20 +27,39 @@ export const Profile = () => {
         navigate(ROUTER.USER.LOGIN);
     };
 
-    const handleDeleteAccount = () => {
-        // Thực hiện API xóa tài khoản tại đây
-        alert("Tài khoản đã được xóa!");
-        localStorage.removeItem("user");
-        setUser(null);
-        navigate(ROUTER.USER.HOME);
+    const handleDeleteAccount = async () => {
+        if (!user) return;
+
+        try {
+            // Gọi API DELETE
+            await axios.delete(`http://127.0.0.1:5000/api/users/${user.user_id}`);
+            alert("Tài khoản đã được xóa!");
+            localStorage.removeItem("user");
+            setUser(null);
+            navigate(ROUTER.USER.HOME);
+        } catch (error) {
+            console.error("Lỗi khi xóa tài khoản:", error);
+            alert("Xóa tài khoản thất bại. Vui lòng thử lại.");
+        }
     };
 
-    const handleUpdateInfo = () => {
-        // Thực hiện API cập nhật tài khoản tại đây
-        alert("Thông tin tài khoản đã được cập nhật!");
-        localStorage.setItem("user", JSON.stringify(formData));
-        setUser(formData);
-        setIsUpdateModalOpen(false);
+    const handleUpdateInfo = async () => {
+        if (!user) return;
+
+        try {
+            // Gọi API PUT để cập nhật thông tin
+            const response = await axios.put(
+                `http://127.0.0.1:5000/api/users/${user.user_id}`,
+                formData
+            );
+            alert("Thông tin tài khoản đã được cập nhật!");
+            localStorage.setItem("user", JSON.stringify(response.data));
+            setUser(response.data);
+            setIsUpdateModalOpen(false);
+        } catch (error) {
+            console.error("Lỗi khi cập nhật tài khoản:", error);
+            alert("Cập nhật tài khoản thất bại. Vui lòng thử lại.");
+        }
     };
 
     const handleInputChange = (e) => {
@@ -57,24 +77,24 @@ export const Profile = () => {
                         <div className="profile-details">
                             <div className="profile-section">
                                 <span>
-                                    <strong>Tên người dùng:</strong> {user.name}
+                                    <strong>Tên người dùng:</strong> {user.user_name}
                                 </span>
                                 <span>
-                                    <strong>Email:</strong> {user.email}
+                                    <strong>Email:</strong> {user.user_email}
                                 </span>
                                 <span>
-                                    <strong>Số điện thoại:</strong> {user.phone}
+                                    <strong>Số điện thoại:</strong> {user.user_phone}
                                 </span>
                             </div>
                             <div className="profile-section">
                                 <span>
-                                    <strong>Giới tính:</strong> {user.gender}
+                                    <strong>Giới tính:</strong> {user.user_gender}
                                 </span>
                                 <span>
-                                    <strong>Ngày sinh:</strong> {user.date_of_birth}
+                                    <strong>Ngày sinh:</strong> {user.user_date_of_birth}
                                 </span>
                                 <span>
-                                    <strong>Địa chỉ:</strong> Hà Nội
+                                    <strong>Địa chỉ:</strong> {user.user_address}
                                 </span>
                             </div>
                             <div className="profile-actions">
@@ -110,8 +130,8 @@ export const Profile = () => {
                                     Tên người dùng:
                                     <input
                                         type="text"
-                                        name="name"
-                                        value={formData.name || ""}
+                                        name="user_name"
+                                        value={formData.user_name || ""}
                                         onChange={handleInputChange}
                                     />
                                 </label>
@@ -119,8 +139,8 @@ export const Profile = () => {
                                     Email:
                                     <input
                                         type="email"
-                                        name="email"
-                                        value={formData.email || ""}
+                                        name="user_email"
+                                        value={formData.user_email || ""}
                                         onChange={handleInputChange}
                                     />
                                 </label>
@@ -128,8 +148,8 @@ export const Profile = () => {
                                     Số điện thoại:
                                     <input
                                         type="text"
-                                        name="phone"
-                                        value={formData.phone || ""}
+                                        name="user_phone"
+                                        value={formData.user_phone || ""}
                                         onChange={handleInputChange}
                                     />
                                 </label>
@@ -137,8 +157,8 @@ export const Profile = () => {
                                     Giới tính:
                                     <input
                                         type="text"
-                                        name="gender"
-                                        value={formData.gender || ""}
+                                        name="user_gender"
+                                        value={formData.user_gender || ""}
                                         onChange={handleInputChange}
                                     />
                                 </label>
@@ -146,8 +166,17 @@ export const Profile = () => {
                                     Ngày sinh:
                                     <input
                                         type="date"
-                                        name="date_of_birth"
-                                        value={formData.date_of_birth || ""}
+                                        name="user_date_of_birth"
+                                        value={formData.user_date_of_birth || ""}
+                                        onChange={handleInputChange}
+                                    />
+                                </label>
+                                <label>
+                                    Địa chỉ:
+                                    <input
+                                        type="text"
+                                        name="user_address"
+                                        value={formData.user_address || ""}
                                         onChange={handleInputChange}
                                     />
                                 </label>

@@ -1,12 +1,11 @@
 import { ROUTER } from "./Utils/router";
 import HomePage from "./Page/Home/home";
 import LoginPage from "./Page/Login/login";
-import CartPage from "./Page/Cart/cart";
+import {CartPage} from "./Page/Cart/cart";
 import { Route, Routes } from "react-router-dom";
 import MasterLayout from "./Page/Home/MasterLayout/master_layout";
 import RegisterPage from "./Page/Register/register";
 import { Products } from "./Page/Products/products";
-// import { Component } from "react";
 import { Orders } from "./Page/Orders/oders";
 import { Profile } from "./Page/Profile/profile";
 import { AdminHome } from "./Page/Admin/admin";

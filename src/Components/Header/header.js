@@ -10,6 +10,7 @@ import { ROUTER } from "../../Utils/router";
 import logo from "../../Asset/logo.png";
 import { AuToSlider } from "../Slider/sliderAd";
 import { useNavigate } from "react-router-dom";
+import { fetchListCart } from "../../Api/getCart";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -74,6 +75,30 @@ const Header = () => {
     "https://book365.vn/upload/resize_cache/uf/5f2/950_290_1/u8o6rq84711k2t5i2jnrn4vumfw1xh8v.png",
     "https://bookfun.vn/wp-content/uploads/2024/06/top-10-cuon-sach-hay-nen-doc.png.webp",
   ];
+
+
+  const [listCartItem, setListCartItem] = useState([]);
+  const [error, setError] = useState(null); // State xử lý lỗi
+  // Gọi API lấy dữ liệu giỏ hàng khi user thay đổi
+  useEffect(() => {
+    if (user) {
+      const loadListCart = async () => {
+        try {
+          const data = await fetchListCart(user.user_id); // Gọi API lấy dữ liệu giỏ hàng
+          setListCartItem(data);
+        } catch (err) {
+          setError(err.message); // Xử lý lỗi nếu API thất bại
+        }
+      };
+      loadListCart();
+    }
+  }, [user]);
+
+  // Hiển thị lỗi nếu có
+  if (error) {
+    return <div className="error-message">{error}</div>;
+  }
+
   return (
     <>
       <div className="header-top">
@@ -116,7 +141,7 @@ const Header = () => {
                   {user ? (
                     <Link to={ROUTER.USER.PROFILE}>
                       <SlUser />
-                      <span>{user.name}</span>
+                      <span>{user.user_name}</span>
                     </Link>
                   ) : (
                     <Link to={ROUTER.USER.LOGIN}>
@@ -169,7 +194,7 @@ const Header = () => {
                 <li>
                   <Link to={ROUTER.USER.SHOPCART} style={{ color: "#1c1c1c" }}>
                     <AiOutlineShoppingCart />
-                    <span>0</span>
+                    <span>{listCartItem.length}</span>
                   </Link>
                 </li>
               </ul>

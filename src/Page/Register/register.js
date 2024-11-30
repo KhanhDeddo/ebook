@@ -1,26 +1,62 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./register.scss";
 import { Link } from "react-router-dom";
+import { createCart } from "../../Api/createCart";
+import { fetchUsers } from "../../Api/user";
 
 const RegisterPage = () => {
+  const [users, setUsers] = useState([]); // Danh sách user từ API
+    // Lấy danh sách người dùng từ API
+    useEffect(() => {
+      const loadUsers = async () => {
+        try {
+          const data = await fetchUsers();
+          setUsers(data);
+        } catch (err) {
+          setError(err.message);
+        }
+      };
+      loadUsers();
+    }, []);
+  const handleLogin = async (id) => {
+    try {
+        const cartData = {
+          user_id: id,
+        };
+        // Gửi yêu cầu POST tới API để thêm CartItem
+        await createCart(cartData);
+    } catch (error) {
+      alert(`Lỗi khi thêm vào giỏ hàng: ${error.message}`);
+      console.error("Lỗi thêm vào giỏ hàng:", error);
+    }
+  };
   // State để lưu thông tin form
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    dob: "",
-    address: "",
-    gender: "",
+    user_name: "",
+    user_email: "",
+    user_password: "",
+    user_date_of_birth: "",
+    user_address: "",
+    user_phone: "",
+    user_gender: "",
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false); // Trạng thái gửi form
   const [error, setError] = useState(null); // Lưu lỗi nếu có
   const [success, setSuccess] = useState(null); // Lưu thông báo thành công
 
+  // Hàm kiểm tra email hợp lệ
+  const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  // Hàm kiểm tra số điện thoại hợp lệ
+  const isValidPhone = (phone) => /^[0-9]{10,11}$/.test(phone);
+
   // Xử lý thay đổi input
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    setError(null);
+    setSuccess(null);
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
@@ -34,20 +70,41 @@ const RegisterPage = () => {
     setError(null);
     setSuccess(null);
 
+    // Kiểm tra đầu vào trước khi gửi
+    if (!isValidEmail(formData.user_email)) {
+      setError("Email không hợp lệ.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!isValidPhone(formData.user_phone)) {
+      setError("Số điện thoại phải gồm 10-11 chữ số.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (formData.user_password.length < 6) {
+      setError("Mật khẩu phải có ít nhất 6 ký tự.");
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       // POST request
-      const response = await axios.post("http://localhost:5000/api/register", formData);
+      const response = await axios.post("http://127.0.0.1:5000/api/users", formData);
+      handleLogin(users.length+1)
       setSuccess("Đăng ký thành công!");
       setFormData({
-        name: "",
-        email: "",
-        password: "",
-        dob: "",
-        address: "",
-        gender: "",
+        user_name: "",
+        user_email: "",
+        user_password: "",
+        user_date_of_birth: "",
+        user_address: "",
+        user_phone: "",
+        user_gender: "",
       });
     } catch (err) {
-      setError("Đăng ký thất bại! Vui lòng thử lại.");
+      setError(err.response?.data?.error || "Đăng ký thất bại! Vui lòng thử lại.");
     } finally {
       setIsSubmitting(false);
     }
@@ -71,8 +128,8 @@ const RegisterPage = () => {
             <label>Họ và tên</label>
             <input
               type="text"
-              name="name"
-              value={formData.name}
+              name="user_name"
+              value={formData.user_name}
               onChange={handleInputChange}
               placeholder="Nhập họ và tên"
               required
@@ -81,18 +138,28 @@ const RegisterPage = () => {
             <label>Email</label>
             <input
               type="email"
-              name="email"
-              value={formData.email}
+              name="user_email"
+              value={formData.user_email}
               onChange={handleInputChange}
               placeholder="Nhập email"
+              required
+            />
+
+            <label>Số điện thoại</label>
+            <input
+              type="text"
+              name="user_phone"
+              value={formData.user_phone}
+              onChange={handleInputChange}
+              placeholder="Nhập số điện thoại"
               required
             />
 
             <label>Mật khẩu</label>
             <input
               type="password"
-              name="password"
-              value={formData.password}
+              name="user_password"
+              value={formData.user_password}
               onChange={handleInputChange}
               placeholder="Nhập mật khẩu"
               required
@@ -101,8 +168,8 @@ const RegisterPage = () => {
             <label>Ngày sinh *</label>
             <input
               type="date"
-              name="dob"
-              value={formData.dob}
+              name="user_date_of_birth"
+              value={formData.user_date_of_birth}
               onChange={handleInputChange}
               required
             />
@@ -110,8 +177,8 @@ const RegisterPage = () => {
             <label>Địa chỉ</label>
             <input
               type="text"
-              name="address"
-              value={formData.address}
+              name="user_address"
+              value={formData.user_address}
               onChange={handleInputChange}
               placeholder="Nhập địa chỉ"
               required
@@ -122,9 +189,9 @@ const RegisterPage = () => {
               <label>
                 <input
                   type="radio"
-                  name="gender"
+                  name="user_gender"
                   value="Nam"
-                  checked={formData.gender === "Nam"}
+                  checked={formData.user_gender === "Nam"}
                   onChange={handleInputChange}
                 />{" "}
                 Nam
@@ -132,19 +199,13 @@ const RegisterPage = () => {
               <label>
                 <input
                   type="radio"
-                  name="gender"
+                  name="user_gender"
                   value="Nữ"
-                  checked={formData.gender === "Nữ"}
+                  checked={formData.user_gender === "Nữ"}
                   onChange={handleInputChange}
                 />{" "}
                 Nữ
               </label>
-            </div>
-
-            <div className="terms">
-              <input type="checkbox" required className="checkb" /> Bằng việc bấm
-              vào nút đăng ký, bạn đã chấp nhận
-              <a href="#terms"> chính sách bảo mật thông tin</a>.
             </div>
 
             <button type="submit" className="register-button" disabled={isSubmitting}>

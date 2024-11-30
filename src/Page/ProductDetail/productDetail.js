@@ -1,42 +1,44 @@
 import { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
-import { fetchBookDetails } from "../../Api/bookdetail"; // API lấy chi tiết sách
+import { fetchBookDetails } from "../../Api/bookdetail";
 import { NavBar } from "../../Components/Navbar/navbar";
 import "./productDetails.scss";
 import Carousel from "react-multi-carousel";
 import { fetchBooks } from "../../Api/book";
 import { CardBook } from "../../Components/Card/card";
 import { addToCart } from "../../Api/addToCart";
+import { fetchCartItem } from "../../Api/getCartItem";
+import { updateCartItem } from "../../Api/updateCartItem";
 
 const BookDetails = () => {
   const { id } = useParams(); // Lấy ID sách từ URL
   const [book, setBook] = useState(null); // Lưu thông tin sách
+  const [cartItem, setCartItem] = useState(null); // Lưu thông tin sách
   const [error, setError] = useState(null); // Lưu thông báo lỗi
   const [quantity, setQuantity] = useState(1); // Số lượng mua sách
   const [books, setBooks] = useState([]); // State lưu danh sách sách
   const [isOutOfStock, setIsOutOfStock] = useState(false); // Trạng thái hết hàng
-
   const location = useLocation();
   const [user, setUser] = useState(null);
+  // Lấy thông tin người dùng từ localStorage
   useEffect(() => {
-    const storedUser = localStorage.getItem("user"); // Lấy thông tin người dùng từ localStorage
+    const storedUser = localStorage.getItem("user"); 
     if (storedUser) {
-      setUser(JSON.parse(storedUser)); // Chuyển đổi chuỗi JSON thành đối tượng
+      setUser(JSON.parse(storedUser));
     }
   }, [location]);
   // Lấy danh sách sách
   useEffect(() => {
     const loadBooks = async () => {
       try {
-        const data = await fetchBooks(); // Gọi API lấy dữ liệu sách
+        const data = await fetchBooks();
         setBooks(data);
       } catch (err) {
-        setError(err.message); // Xử lý lỗi nếu API thất bại
+        setError(err.message);
       }
     };
     loadBooks();
   }, []);
-
   // Responsive setting cho Carousel
   const responsive = {
     superLargeDesktop: {
@@ -56,12 +58,11 @@ const BookDetails = () => {
       items: 2,
     },
   };
-
   // Lấy chi tiết sách
   useEffect(() => {
     const loadBookDetails = async () => {
       try {
-        const data = await fetchBookDetails(id); // Gọi API lấy chi tiết sách
+        const data = await fetchBookDetails(id);
         setBook(data);
         setIsOutOfStock(data.stock_quantity === 0); // Cập nhật trạng thái hết hàng khi dữ liệu tải xong
       } catch (err) {
@@ -70,25 +71,33 @@ const BookDetails = () => {
     };
     loadBookDetails();
   }, [id]);
-
+  // Kiểm tra coi sách tồn tại trong giỏ hàng chưa
+  useEffect(() => {
+    const loadCartItem = async () => {
+      try {
+        const data = await fetchCartItem(user.user_id,id); 
+        setCartItem(data);
+      } catch (err) {}
+    };
+    loadCartItem();
+  }, [id,user]);
+ // Hiển thị lỗi nếu xảy ra
   if (error) {
-    return <div className="error-message">Lỗi: {error}</div>; // Hiển thị lỗi nếu xảy ra
+    return <div className="error-message">Lỗi: {error}</div>;
   }
+  // Hiển thị trạng thái tải  
   if (!book) {
-    return <div>Đang tải chi tiết sách...</div>; // Hiển thị trạng thái tải
+    return <div>Đang tải chi tiết sách...</div>; 
   }
-
   // Xử lý thay đổi số lượng
   const handleQuantityChange = (type) => {
     setQuantity((prev) => (type === "increment" ? prev + 1 : prev > 1 ? prev - 1 : 1));
     setIsOutOfStock(book.stock_quantity === 0); // Cập nhật lại trạng thái hết hàng khi số lượng thay đổi
   };
-
   // Tính tổng tiền
   const totalPrice = (parseFloat(book.price) * quantity).toFixed(2);
-
-  // Xử lý sự kiện khi người dùng nhấn vào nút "Thêm vào giỏ hàng" hoặc "Mua ngay"
-  const handleAddCartAction = async (action) => {
+  // Xử lý sự kiện khi người dùng nhấn vào nút "Thêm vào giỏ hàng"
+  const handleAddCartAction = async () => {
     if (isOutOfStock) {
       alert("Sản phẩm đã hết hàng và không thể thêm vào giỏ hàng.");
       return;
@@ -97,15 +106,41 @@ const BookDetails = () => {
       alert("Bạn chưa đăng nhập, vui lòng đăng nhập!");
       return;
     }
+  
     try {
-      // Gọi API thêm vào giỏ hàng
-      const result = await addToCart(user.id, book.id, quantity);
-      alert(`Đã ${action} ${book.title} vào giỏ hàng!`);
-      console.log("Kết quả thêm vào giỏ hàng:", result);
+      if (cartItem) {
+        const cartItemData = {
+          quantity: quantity + cartItem.quantity,
+          price_at_purchase: book.price * quantity + Number(cartItem.price_at_purchase),
+        };
+  
+        // Gửi yêu cầu PUT tới API để cập nhật CartItem
+        const response = await updateCartItem(user.user_id, id, cartItemData);
+        alert(`Đã cập nhật ${book.title} trong giỏ hàng!`);
+        console.log("Cập nhật giỏ hàng:", response);
+      } else {
+        const cartItemData = {
+          cart_id: user.user_id,
+          book_id: book.id,
+          quantity: quantity,
+          price_at_purchase: book.price * quantity,
+        };
+  
+        // Gửi yêu cầu POST tới API để thêm CartItem
+        const response = await addToCart(cartItemData);
+        alert(`Đã thêm ${book.title} vào giỏ hàng!`);
+        console.log("Thêm vào giỏ hàng:", response);
+      }
+      // Gọi lại API để lấy thông tin mới nhất về giỏ hàng
+      const updatedCartItem = await fetchCartItem(user.user_id, id);
+      setCartItem(updatedCartItem); // Cập nhật lại state `cartItem`
     } catch (error) {
-      alert(`Lỗi: ${error.message}`);
+      alert(`Lỗi khi thêm vào giỏ hàng: ${error.message}`);
+      console.error("Lỗi thêm vào giỏ hàng:", error);
     }
   };
+  
+
   const handleBuyAction = (action) => {
     if (isOutOfStock) {
       alert("Sản phẩm đã hết hàng và không thể mua.");
