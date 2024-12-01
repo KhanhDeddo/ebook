@@ -12,6 +12,7 @@ import { AuToSlider } from "../Slider/sliderAd";
 import { useNavigate } from "react-router-dom";
 import { fetchListCart } from "../../Api/getCart";
 
+
 const Header = () => {
   const navigate = useNavigate();
   const [searchValue, setSearchValue] = useState("");
@@ -78,21 +79,28 @@ const Header = () => {
 
 
   const [listCartItem, setListCartItem] = useState([]);
-  const [error, setError] = useState(null); // State xử lý lỗi
-  // Gọi API lấy dữ liệu giỏ hàng khi user thay đổi
-  useEffect(() => {
+  const [error, setError] = useState(null);
+
+  const loadListCart = async () => {
     if (user) {
-      const loadListCart = async () => {
-        try {
-          const data = await fetchListCart(user.user_id); // Gọi API lấy dữ liệu giỏ hàng
-          setListCartItem(data);
-        } catch (err) {
-          setError(err.message); // Xử lý lỗi nếu API thất bại
-        }
-      };
-      loadListCart();
+      try {
+        const data = await fetchListCart(user.user_id); // Gọi API lấy giỏ hàng
+        setListCartItem(data);
+      } catch (err) {
+        setError(err.message); // Xử lý lỗi
+      }
     }
-  }, [user]);
+  };
+
+  useEffect(() => {
+    loadListCart();
+  },[user]);
+
+  // // Hàm callback để cập nhật giỏ hàng
+  // const onCartUpdated = () => {
+  //   loadListCart(); // Tải lại danh sách giỏ hàng
+  // };
+  // // <BookDetails onCartUpdated={onCartUpdated} />
 
   // Hiển thị lỗi nếu có
   if (error) {
@@ -262,6 +270,7 @@ const Header = () => {
             </div>
           </div>
         )}
+        {/* <BookDetails onCartUpdated={onCartUpdated} /> */}
       </div>
     </>
   );
