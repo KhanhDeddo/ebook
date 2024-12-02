@@ -1,4 +1,6 @@
-.cart-item-details{
+@use "sass:map";
+@import "../../Style/Page/theme";
+.cart-title{
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -7,14 +9,18 @@
     height: 50px;
     margin: 5px;
     padding: 0 10px 0 10px;
+    font-size: 16.3px;
+    font-weight: bold;
+    color:map.get($theme-color,"normal-text")
 }
-.haha{
+.cart-item{
+    color:map.get($theme-color,"normal-text");
     display: flex;
     align-items: center;
     justify-content: space-between;
     border: 1px solid #ebebeb;
     border-radius: 10px;
-    height: 70px;
+    height: 90px;
     margin: 5px;
 }
 .control{
@@ -30,10 +36,11 @@
         button{
             border: #ebebeb;
             width: 200px;
-            background-color: rgb(27, 114, 6);
+            background-color: map.get($theme-color,"main");
             color:white;
             font-size: 20px;
-            height: 30px;
+            height: 40px;
+            border-radius: 5px;
         }
     }
 }
@@ -42,15 +49,37 @@
     justify-content: center;
     flex: 0 0 12.5%;
     max-width: 12.5%;
+    .image-book{
+        width: 71%;
+        height: 100%;
+        padding: 10px;
+    }
 }
-.hmmm{
+.control-quantity{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #ebebeb;
+    button{
+        display: flex;
+        align-items: center;
+        width: 30px;
+        height: 25px;
+        background-color: map.get($theme-color,"main");
+        font-size: 20px;
+        padding: 10px;
+        color:white;
+        border-color: map.get($theme-color,"main");
+    }
+}
+.option{
     display: flex;
     column-gap: 10px;
     justify-content: center;
     align-items: center;
     button{
         padding: 5px;
-        background-color: rgb(190, 4, 4);
+        background-color: rgba(226, 0, 0, 0.801);
         font-size: 12px;
         font-weight: bold;
         color:white;
@@ -62,4 +91,10 @@
         width: 20px;
         height: 20px;
     }
+}
+.con-hang{
+    color:green
+}
+.het-hang{
+    color:red
 }

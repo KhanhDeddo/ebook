@@ -91,7 +91,7 @@ const RegisterPage = () => {
 
     try {
       // POST request
-      const response = await axios.post("http://127.0.0.1:5000/api/users", formData);
+      await axios.post("http://127.0.0.1:5000/api/users", formData);
       handleLogin(users.length+1)
       setSuccess("Đăng ký thành công!");
       setFormData({
@@ -193,6 +193,7 @@ const RegisterPage = () => {
                   value="Nam"
                   checked={formData.user_gender === "Nam"}
                   onChange={handleInputChange}
+                  required
                 />{" "}
                 Nam
               </label>
@@ -203,6 +204,7 @@ const RegisterPage = () => {
                   value="Nữ"
                   checked={formData.user_gender === "Nữ"}
                   onChange={handleInputChange}
+                  required
                 />{" "}
                 Nữ
               </label>

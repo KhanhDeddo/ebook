@@ -10,6 +10,7 @@ import { Orders } from "./Page/Orders/oders";
 import { Profile } from "./Page/Profile/profile";
 import { AdminHome } from "./Page/Admin/admin";
 import BookDetails from "./Page/ProductDetail/productDetail";
+import { PaymentPage } from "./Page/Payment/payment";
 
 const RenderRouter = () => {
     const userRouters = [
@@ -44,6 +45,10 @@ const RenderRouter = () => {
         {
             path: ROUTER.USER.PRODUCTDETAIL,
             Component:<BookDetails/>
+        },
+        {
+            path: ROUTER.USER.PAYMENT,
+            Component:<PaymentPage/>
         },
         {
             path: ROUTER.ADMIN.HOME,

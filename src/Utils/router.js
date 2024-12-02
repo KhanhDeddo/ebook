@@ -8,6 +8,7 @@ export const ROUTER = {
         SHOPCART:"/gio-hang",
         ORDERS:"/don-hang",
         PRODUCTDETAIL:"/san-pham-chi-tiet/:id",
+        PAYMENT:"/thanh-toan",
     },
     ADMIN: {
         HOME:"/admin"

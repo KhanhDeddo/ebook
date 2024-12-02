@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
 import "./cart.scss";
 import { fetchListCart } from "../../Api/getCart"; // Giả sử fetchListCart trả về dữ liệu giỏ hàng
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { fetchBooks } from "../../Api/book";
+import { ROUTER } from "../../Utils/router";
+import { NavBar } from "../../Components/Navbar/navbar";
 
 export const CartPage = () => {
   const location = useLocation();
@@ -10,6 +13,7 @@ export const CartPage = () => {
   const [error, setError] = useState(null); // State xử lý lỗi
   const [selectAll, setSelectAll] = useState(false); // State cho checkbox "chọn tất cả"
   const [selectedBookIds, setSelectedBookIds] = useState([]); // State cho các book_id được chọn
+  const [listBook, setListBook] = useState([]); // State cho các book_id được chọn
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -17,7 +21,19 @@ export const CartPage = () => {
       setUser(JSON.parse(storedUser)); // Chuyển đổi chuỗi JSON thành đối tượng
     }
   }, [location]);
-
+  useEffect(() => {
+    if(user){
+      const loadListBook = async () => {
+        try {
+          const data = await fetchBooks(); // Gọi API lấy dữ liệu giỏ hàng
+          setListBook(data);
+        } catch (err) {
+          setError(err.message); // Xử lý lỗi nếu API thất bại
+        }
+      };
+      loadListBook();
+    }
+  },[user])
   useEffect(() => {
     if (user) {
       const loadListCart = async () => {
@@ -80,13 +96,16 @@ export const CartPage = () => {
   if (error) {
     return <div className="error-message">{error}</div>;
   }
-
+  const findBookById = (book_id) => {
+    return listBook.find((book) => book.id === book_id);
+  };
+  
   return (
     <div className="container">
-      <h2>Giỏ hàng của bạn</h2>
+      <NavBar name ="Giỏ hàng"/>
       <div className="row">
         <div className="col-lg-9">
-          <div className="row haha">
+          <div className="row cart-title">
             <div className="col-lg-15">
               <p>Ảnh</p>
             </div>
@@ -106,9 +125,9 @@ export const CartPage = () => {
               <p>Trạng thái</p>
             </div>
             <div className="col-lg-15">
-              <p>Ngày Thêm</p>
+              <p>Ngày thêm</p>
             </div>
-            <div className="col-lg-15 hmmm">
+            <div className="col-lg-15 option">
               <input
                 type="checkbox"
                 checked={selectAll}
@@ -119,48 +138,58 @@ export const CartPage = () => {
           {listCartItem.length === 0 ? (
             <p>Giỏ hàng của bạn hiện đang trống.</p>
           ) : (
-            <div className="cart-items">
-              {listCartItem.map((item) => (
-                <div key={item.book_id} className="cart-item">
-                  <div className="">
-                    <div className="row haha">
-                      <div className="col-lg-15">
-                        <image>ảnh</image>
-                      </div>
-                      <div className="col-lg-15">
-                        <p>Toán</p>
-                      </div>
-                      <div className="col-lg-15">
-                        <p>{item.price_at_purchase} VND</p>
-                      </div>
-                      <div className="col-lg-15">
-                        <p>{item.quantity}</p>
-                      </div>
-                      <div className="col-lg-15">
-                        <p>{item.price_at_purchase} VND</p>
-                      </div>
-                      <div className="col-lg-15">
-                        <p>còn hàng</p>
-                      </div>
-                      <div className="col-lg-15">
-                        <p>{new Date(item.added_at).toLocaleString()}</p>
-                      </div>
-                      <div className="col-lg-15 hmmm">
-                        <button
-                          onClick={() => deleteCartItem(item.cart_id, item.book_id)}
-                        >
-                          Xóa
-                        </button>
-                        <input
-                          type="checkbox"
-                          checked={selectedBookIds.includes(item.book_id)}
-                          onChange={() => handleCheckboxChange(item.book_id)}
-                        />
-                      </div>
+            <div>
+              {listCartItem.map((item) => {
+                const book = findBookById(item.book_id);
+                if (!book) {
+                  return (
+                    <div key={item.book_id}>
+                      <p>Không tìm thấy thông tin sách cho ID: {item.book_id}</p>
                     </div>
+                  );
+                }
+                return (
+                  <div key={item.book_id}>
+                    <div className="row cart-item">
+                        <div className="col-lg-15 ">
+                          <img src={book.image_url} alt={book.title} className="image-book" />
+                        </div>
+                        <div className="col-lg-15">
+                          <p>{book.title}</p>
+                        </div>
+                        <div className="col-lg-15">
+                          <p>{book.price} VND</p>
+                        </div>
+                        <div className="col-lg-15 control-quantity">
+                          <button>-</button>
+                          <p>{item.quantity}</p>
+                          <button>-</button>
+                        </div>
+                        <div className="col-lg-15">
+                          <p>{item.price_at_purchase} VND</p>
+                        </div>
+                        <div className={book.stock_quantity > 0 ? "col-lg-15 con-hang":"col-lg-15 het-hang"}>
+                          {book.stock_quantity > 0 ? <p>Còn hàng</p>:<p>Hết hàng</p>}
+                        </div>
+                        <div className="col-lg-15">
+                          <p>{new Date(item.added_at).toLocaleString()}</p>
+                        </div>
+                        <div className="col-lg-15 option">
+                          <button
+                            onClick={() => deleteCartItem(item.cart_id, item.book_id)}
+                          >
+                            Xóa
+                          </button>
+                          <input
+                            type="checkbox"
+                            checked={selectedBookIds.includes(item.book_id)}
+                            onChange={() => handleCheckboxChange(item.book_id)}
+                          />
+                        </div>
+                      </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -170,10 +199,15 @@ export const CartPage = () => {
             <p>Thành tiền:</p>
           </div>
           <div className="b">
-            <button>Đặt hàng</button>
+            {listCartItem.length>0?
+               <Link to={ROUTER.USER.PAYMENT}>
+               <button>Đặt hàng</button>
+             </Link>
+             :<button>Đặt hàng</button>
+            }
           </div>
         </div>
       </div>
     </div>
   );
-};
+};  
