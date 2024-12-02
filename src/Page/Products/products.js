@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { NavBar } from "../../Components/Navbar/navbar";
 import "./products.scss";
-import { fetchBooks } from "../../Api/book";
+import { fetchBooks } from "../../Api/getListBook";
 import { CardBook } from "../../Components/Card/card";
 import { useLocation } from "react-router-dom";
 import { ROUTER } from "../../Utils/router";

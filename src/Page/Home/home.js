@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
 import { CardBook } from "../../Components/Card/card";
-import { fetchBooks } from "../../Api/book"; // API call function
+import { fetchBooks } from "../../Api/getListBook"; // API call function
 import "./home.scss";
 
 const HomePage = () => {

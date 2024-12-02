@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import "./cart.scss";
 import { fetchListCart } from "../../Api/getCart"; // Giả sử fetchListCart trả về dữ liệu giỏ hàng
 import { useLocation } from "react-router-dom";
-import { fetchBooks } from "../../Api/book";
+import { fetchBooks } from "../../Api/getListBook";
 import { NavBar } from "../../Components/Navbar/navbar";
 
 export const CartPage = () => {

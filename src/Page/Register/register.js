@@ -3,7 +3,7 @@ import axios from "axios";
 import "./register.scss";
 import { Link } from "react-router-dom";
 import { createCart } from "../../Api/createCart";
-import { fetchUsers } from "../../Api/user";
+import { fetchUsers } from "../../Api/getListUser";
 
 const RegisterPage = () => {
   const [users, setUsers] = useState([]); // Danh sách user từ API

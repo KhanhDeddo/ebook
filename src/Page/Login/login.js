@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { fetchUsers } from "../../Api/user"; // Import hàm API
+import { fetchUsers } from "../../Api/getListUser"; // Import hàm API
 import "./login.scss";
 import { ROUTER } from "../../Utils/router";
 // import { createCart } from "../../Api/createCart";

@@ -1,12 +1,12 @@
 import { useEffect, useState, useCallback } from "react";
 import { useLocation, useParams } from "react-router-dom";
-import { fetchBookDetails } from "../../Api/bookdetail";
+import { fetchBookDetails } from "../../Api/getBook";
 import { NavBar } from "../../Components/Navbar/navbar";
 import "./productDetails.scss";
 import Carousel from "react-multi-carousel";
-import { fetchBooks } from "../../Api/book";
+import { fetchBooks } from "../../Api/getListBook";
 import { CardBook } from "../../Components/Card/card";
-import { addToCart } from "../../Api/addToCart";
+import { createCartItem } from "../../Api/createCartItem";
 import { fetchCartItem } from "../../Api/getCartItem";
 import { updateCartItem } from "../../Api/updateCartItem";
 
@@ -110,7 +110,7 @@ const BookDetails = ({ onCartUpdated }) => {
           quantity,
           price_at_purchase: book.price * quantity,
         };
-        await addToCart(newCartItem);
+        await createCartItem(newCartItem);
         if (onCartUpdated) {
           onCartUpdated();
         }
