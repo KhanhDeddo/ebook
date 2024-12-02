@@ -11,6 +11,11 @@ export const ROUTER = {
         PAYMENT:"/thanh-toan",
     },
     ADMIN: {
-        HOME:"/admin"
-    }
+		HOME: '/admin',
+		PRODUCT: 'admin/product',
+		ORDER: 'admin/order',
+		ADD_PRODUCT: 'admin/add-product',
+		PROFILE: 'admin/profile',
+		WALLET: 'admin/wallet',
+	},
 }
