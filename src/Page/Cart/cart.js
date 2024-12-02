@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import "./cart.scss";
 import { fetchListCart } from "../../Api/getCart"; // Giả sử fetchListCart trả về dữ liệu giỏ hàng
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { fetchBooks } from "../../Api/book";
-import { ROUTER } from "../../Utils/router";
 import { NavBar } from "../../Components/Navbar/navbar";
 
 export const CartPage = () => {
@@ -14,6 +13,12 @@ export const CartPage = () => {
   const [selectAll, setSelectAll] = useState(false); // State cho checkbox "chọn tất cả"
   const [selectedBookIds, setSelectedBookIds] = useState([]); // State cho các book_id được chọn
   const [listBook, setListBook] = useState([]); // State cho các book_id được chọn
+  const [payment,setPayment] = useState(false)
+  // Tính tổng tiền
+  const total = selectedBookIds.reduce(
+    (sum, item) => sum + Number(item.price_at_purchase),
+    0
+  );
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -78,7 +83,7 @@ export const CartPage = () => {
   const handleSelectAll = () => {
     setSelectAll(!selectAll);
     if (!selectAll) {
-      setSelectedBookIds(listCartItem.map((item) => item.book_id));
+      setSelectedBookIds(listCartItem.map((item) => item));
     } else {
       setSelectedBookIds([]);
     }
@@ -99,11 +104,12 @@ export const CartPage = () => {
   const findBookById = (book_id) => {
     return listBook.find((book) => book.id === book_id);
   };
-  
   return (
     <div className="container">
       <NavBar name ="Giỏ hàng"/>
-      <div className="row">
+      {user?
+        <div>
+                 <div className="row">
         <div className="col-lg-9">
           <div className="row cart-title">
             <div className="col-lg-15">
@@ -163,7 +169,7 @@ export const CartPage = () => {
                         <div className="col-lg-15 control-quantity">
                           <button>-</button>
                           <p>{item.quantity}</p>
-                          <button>-</button>
+                          <button>+</button>
                         </div>
                         <div className="col-lg-15">
                           <p>{item.price_at_purchase} VND</p>
@@ -180,11 +186,13 @@ export const CartPage = () => {
                           >
                             Xóa
                           </button>
-                          <input
+                          {book.stock_quantity>0?
+                            <input
                             type="checkbox"
-                            checked={selectedBookIds.includes(item.book_id)}
-                            onChange={() => handleCheckboxChange(item.book_id)}
-                          />
+                            checked={selectedBookIds.includes(item)}
+                            onChange={() => handleCheckboxChange(item)}
+                          />:<div></div>
+                          }
                         </div>
                       </div>
                   </div>
@@ -196,18 +204,140 @@ export const CartPage = () => {
         <div className="col-lg-3 control">
           <div>
             <p>Số lượng: {selectedBookIds.length}</p>
-            <p>Thành tiền:</p>
+            <p>Thành tiền:{total}.000VND</p>
           </div>
           <div className="b">
-            {listCartItem.length>0?
-               <Link to={ROUTER.USER.PAYMENT}>
-               <button>Đặt hàng</button>
-             </Link>
+            {selectedBookIds.length>0?
+             <button onClick={() => setPayment(true)}>Đặt hàng</button>
              :<button>Đặt hàng</button>
             }
           </div>
         </div>
       </div>
+      {/* Modal cập nhật thông tin */}
+      {payment && (
+                    <div className="payment">
+                        <div className="modal-content">
+                            <div className="row">
+                              <div className="col-lg-6">
+                                <h3>Danh sách mặt hàng</h3>
+                                <div>
+                                  {selectedBookIds.map((item) => {
+                                    const book = findBookById(item.book_id);
+                                    if (!book) {
+                                      return (
+                                        <div key={item.book_id}>
+                                          <p>Không tìm thấy thông tin sách cho ID: {item.book_id}</p>
+                                        </div>
+                                      );
+                                    }
+                                    return (
+                                      <div key={item.book_id}>
+                                        <div className="row cart-item-order">
+                                            <div className="col-lg-24 ">
+                                              <img src={book.image_url} alt={book.title} className="image-book" />
+                                            </div>
+                                            <div className="col-lg-24">
+                                              <p>{book.title}</p>
+                                            </div>
+                                            <div className="col-lg-24">
+                                              <p>{book.price}</p>
+                                            </div>
+                                            <div className="col-lg-24">
+                                              <p>{item.quantity}</p>
+                                            </div>
+                                            <div className="col-lg-24">
+                                              <p>{item.price_at_purchase}</p>
+                                            </div>
+                                          </div>
+                                      </div>
+                                    );
+                                  })}
+                              </div>
+                              </div>
+                              <div className="col-lg-6">
+                                <h3>Thông tin đặt hàng</h3>
+                                <form>
+                                    <label>
+                                        Khách hàng:
+                                        <input
+                                            type="text"
+                                            name="user_name"
+                                            // value={formData.user_name || ""}
+                                            // onChange={handleInputChange}
+                                        />
+                                    </label>
+                                    <label>
+                                        Email:
+                                        <input
+                                            type="email"
+                                            name="user_email"
+                                            // value={formData.user_email || ""}
+                                            // onChange={handleInputChange}
+                                        />
+                                    </label>
+                                    <label>
+                                        Số điện thoại:
+                                        <input
+                                            type="text"
+                                            name="user_phone"
+                                            // value={formData.user_phone || ""}
+                                            // onChange={handleInputChange}
+                                        />
+                                    </label>
+                                    <label>
+                                        Địa chỉ:
+                                        <input
+                                            type="text"
+                                            name="user_address"
+                                            // value={formData.user_address || ""}
+                                            // onChange={handleInputChange}
+                                        />
+                                    </label>
+                                    <label>
+                                      Phương thức thanh toán:
+                                      <div className="methods-payment">
+                                        <div></div>
+                                        <div>
+                                          <input
+                                            type="radio"
+                                            name="paymentMethod"
+                                            value="Thanh toán khi nhận hàng"
+                                          />
+                                          <label>Thanh toán khi nhận hàng</label>
+                                        </div>
+                                      </div>
+                                    </label>
+                                    <label>
+                                        <h4>Tổng tiền: {total}.000VND</h4>
+                                    </label>
+                                    <div className="modal-actions">
+                                        <button
+                                            type="button"
+                                            className="cancel-button"
+                                            onClick={() => setPayment(false)}
+                                        >
+                                            Hủy
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="ok-button"
+                                            // onClick={handleUpdateInfo}
+                                        >
+                                            Xác nhận
+                                        </button>
+                                    </div>
+                                </form>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                )}
+        </div>
+        :<div>
+          Vui lòng đăng nhập để thực hiện chức năng này....
+        </div>
+      }
     </div>
   );
 };  

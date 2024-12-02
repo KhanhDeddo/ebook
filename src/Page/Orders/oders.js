@@ -32,25 +32,37 @@ export const Orders = () => {
     return(
         <div className="container">
             <NavBar name = "Đơn hàng"/>
-            <div className="header-orders">
-                <ul>
-                    { 
-                        menu.map((item,key_item) => (
-                            <li key={key_item}>{item.name}</li>
-                        ))
-                    }
-                </ul>
-            </div>
             {user?
-                <div className="card-order">
-                    <div className="row">
-                        <div className="col-lg-3">image</div>
-                        <div className="col-lg-3">name</div>
-                        <div className="col-lg-3">price</div>
-                        <div className="col-lg-3">huy</div>
+                <div className="row">
+                    <div className="col-lg-3">
+                        <div className="navbar-orders">
+                            <div className="search-orders">
+                                <h3>Tìm kiếm</h3>
+                                <input placeholder="Nhập mã đơn hàng"/>
+                            </div>
+                            <div>
+                            <ul>
+                                { 
+                                    menu.map((item,key_item) => (
+                                        <li key={key_item}>{item.name}</li>
+                                    ))
+                                }
+                            </ul>
+                            </div>
+                        </div>
                     </div>
-                </div>:
-                <div>Vui lòng đăng nhập để thực hiện chức năng này....</div>
+                    <div className="col-lg-9">
+                        <div>
+                            <div className="header-orders">
+                                <div>Mã đơn hàng</div>
+                                <div>Tổng tiền</div>
+                                <div>Trạng thái</div>
+                                <div>Lựa chọn</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                :<div>Vui lòng đăng nhập để thực hiện chức năng này....</div>
             }
         </div>
     )

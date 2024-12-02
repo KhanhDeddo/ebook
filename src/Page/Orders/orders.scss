@@ -1,28 +1,42 @@
 @use "sass:map";
 @import "../../Style/Page/theme";
-.header-orders{
+.navbar-orders{
+    color:map.get($theme-color,"normal-text");
+    line-height: 40px;
+    margin-top: 5px;
+    margin-bottom: 50px;
+    height: 100%;
+    width: 80%;
+    .search-orders{
+        padding-left: 10px;
+    }
     ul{
-        display: flex;
-        justify-content: space-between;
-        background-color: map.get($theme-color,"bg-color");
-        align-items: center;
-        padding: 0 50px 0 50px;
-        margin: 25px;
-        border: 1px solid #ebebeb;
-        border-radius: 1%;
-        height: 60px;
         li{
-        cursor: pointer;
-
+            cursor: pointer;
             list-style: none;
             font-weight: bold;
             font-size: 20px;
-            color:map.get($theme-color,"normal-text");
+            border: 1px solid #ebebeb;
+            border-radius: 5px;
+            margin-top: 5px;
+            padding-left: 10px;
             &:hover{
                 color:map.get($theme-color,"main")
             }
         }
     }
+}
+.header-orders{
+    display: flex;
+    padding: 0 50px 0 50px;
+    justify-content: space-between;
+    align-items: center;
+    height: 50px;
+    font-size: 20px;
+    font-weight: bold;
+    color: map.get($theme-color,"normal-text");
+    border: 1px solid #ebebeb;
+    border-radius: 5px;
 }
 .card-order{
     height: 80px;
