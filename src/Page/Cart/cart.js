@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
 import "./cart.scss";
 import { fetchListCart } from "../../Api/getCart"; // Giả sử fetchListCart trả về dữ liệu giỏ hàng
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { fetchBooks } from "../../Api/getListBook";
 import { NavBar } from "../../Components/Navbar/navbar";
+import { createOrder } from "../../Api/createOrder";
+import { ROUTER } from "../../Utils/router";
 
 export const CartPage = () => {
+  const navigete = useNavigate();
   const location = useLocation();
   const [user, setUser] = useState(null);
   const [listCartItem, setListCartItem] = useState([]);
@@ -13,7 +16,8 @@ export const CartPage = () => {
   const [selectAll, setSelectAll] = useState(false); // State cho checkbox "chọn tất cả"
   const [selectedBookIds, setSelectedBookIds] = useState([]); // State cho các book_id được chọn
   const [listBook, setListBook] = useState([]); // State cho các book_id được chọn
-  const [payment,setPayment] = useState(false)
+  const [payment,setPayment] = useState(false);
+ 
   // Tính tổng tiền
   const total = selectedBookIds.reduce(
     (sum, item) => sum + Number(item.price_at_purchase),
@@ -26,6 +30,7 @@ export const CartPage = () => {
       setUser(JSON.parse(storedUser)); // Chuyển đổi chuỗi JSON thành đối tượng
     }
   }, [location]);
+  
   useEffect(() => {
     if(user){
       const loadListBook = async () => {
@@ -97,12 +102,47 @@ export const CartPage = () => {
         : [...prevSelected, book_id]
     );
   };
-
+  const [order, setOrder] = useState({});
+  useEffect(() => {
+    if (user) {
+      setOrder({
+        user_id : user.user_id,
+        recipient_name: user.user_name || "",
+        recipient_email: user.user_email || "",
+        recipient_phone: user.user_phone || "",
+        shipping_address: user.user_address || "",
+        payment_method: "",
+        total_price: total,
+      });
+    }
+  }, [user,total]);
+  
+   
   if (error) {
     return <div className="error-message">{error}</div>;
   }
   const findBookById = (book_id) => {
     return listBook.find((book) => book.id === book_id);
+  };
+  const handConfirm = async () => {
+    try {
+        // Gửi yêu cầu POST tới API để thêm CartItem
+        await createOrder(order);
+    } catch (error) {
+      alert(`Lỗi khi thêm vào giỏ hàng: ${error.message}`);
+      console.error("Lỗi thêm vào giỏ hàng:", error);
+    }
+  };
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setOrder((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    handConfirm();
+    console.log('Form Data:',order);
+    navigete(ROUTER.USER.ORDERS)
   };
   return (
     <div className="container">
@@ -259,39 +299,39 @@ export const CartPage = () => {
                                 <h3>Thông tin đặt hàng</h3>
                                 <form>
                                     <label>
-                                        Khách hàng:
+                                        Tên người nhận:
                                         <input
                                             type="text"
-                                            name="user_name"
-                                            // value={formData.user_name || ""}
-                                            // onChange={handleInputChange}
+                                            name="recipient_name"
+                                            value={order.recipient_name || ""}
+                                            onChange={handleInputChange}
                                         />
                                     </label>
                                     <label>
-                                        Email:
+                                        Email người nhận:
                                         <input
                                             type="email"
-                                            name="user_email"
-                                            // value={formData.user_email || ""}
-                                            // onChange={handleInputChange}
+                                            name="recipient_email"
+                                            value={order.recipient_email || ""}
+                                            onChange={handleInputChange}
                                         />
                                     </label>
                                     <label>
-                                        Số điện thoại:
+                                        Số điện thoại người nhận:
                                         <input
                                             type="text"
-                                            name="user_phone"
-                                            // value={formData.user_phone || ""}
-                                            // onChange={handleInputChange}
+                                            name="recipient_phone"
+                                            value={order.recipient_phone || ""}
+                                            onChange={handleInputChange}
                                         />
                                     </label>
                                     <label>
-                                        Địa chỉ:
+                                        Địa chỉ nhận hàng:
                                         <input
                                             type="text"
-                                            name="user_address"
-                                            // value={formData.user_address || ""}
-                                            // onChange={handleInputChange}
+                                            name="shipping_address"
+                                            value={order.shipping_address || ""}
+                                            onChange={handleInputChange}
                                         />
                                     </label>
                                     <label>
@@ -301,8 +341,11 @@ export const CartPage = () => {
                                         <div>
                                           <input
                                             type="radio"
-                                            name="paymentMethod"
-                                            value="Thanh toán khi nhận hàng"
+                                            name="payment_method"
+                                            value={"Thanh toán khi nhận hàng"}
+                                            onChange={handleInputChange}
+                                            checked = {order.payment_method === "Thanh toán khi nhận hàng"}
+                                            required
                                           />
                                           <label>Thanh toán khi nhận hàng</label>
                                         </div>
@@ -322,7 +365,7 @@ export const CartPage = () => {
                                         <button
                                             type="button"
                                             className="ok-button"
-                                            // onClick={handleUpdateInfo}
+                                            onClick={handleSubmit}
                                         >
                                             Xác nhận
                                         </button>
