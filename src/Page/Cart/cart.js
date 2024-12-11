@@ -5,7 +5,6 @@ import { useLocation } from "react-router-dom";
 import { fetchBooks } from "../../Api/getListBook";
 import { NavBar } from "../../Components/Navbar/navbar";
 import { createOrder } from "../../Api/createOrder";
-import { createCartItem } from "../../Api/createCartItem";
 import { createOrderItem } from "../../Api/createOrderItem";
 import { fetcOrders } from "../../Api/getListOrder";
 
@@ -155,7 +154,6 @@ export const CartPage = () => {
             };
           console.log(book)          
           createOrderItem(book);
-          deleteCartItem(item.cart_id,item.book_id)
           return(<></>)
         })
         selectedBookIds.map((item) => {
