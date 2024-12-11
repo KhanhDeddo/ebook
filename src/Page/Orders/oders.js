@@ -3,6 +3,7 @@ import "./orders.scss";
 import DataTable from "react-data-table-component";
 import { fetcOrders } from "../../Api/getListOrder";
 import { NavBar } from "../../Components/Navbar/navbar";
+import { updateOrder } from "../../Api/updateOrder";
 
 const Orders = () => {
     const [user, setUser] = useState(null);
@@ -10,6 +11,7 @@ const Orders = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [filterStatus, setFilterStatus] = useState("");
     const [keyTable, setKeyTable] = useState(1);
+    const [statusOrder, setStatusOrder] = useState(true);
 
     useEffect(() => {
         const storedUser = localStorage.getItem("user");
@@ -30,7 +32,7 @@ const Orders = () => {
             };
             loadDataOrders();
         }
-    }, [user]);
+    }, [user, statusOrder]); // Thêm `statusOrder` vào danh sách phụ thuộc    
 
     const handleSearch = (e) => {
         setSearchTerm(e.target.value);
@@ -50,6 +52,28 @@ const Orders = () => {
         })
         .sort((a, b) => new Date(b.order_date) - new Date(a.order_date));
 
+        const handleCancel = async (id) => {
+            const data = {
+                status: "Đã hủy",
+            };
+            try {
+                await updateOrder(id, data); // Gọi API cập nhật trạng thái đơn hàng
+                setStatusOrder(!statusOrder); // Thay đổi trạng thái để kích hoạt `useEffect`
+            } catch (err) {
+                console.error("Error updating order:", err);
+            }
+        };    
+        const handleReOrder = async (id) => {
+            const data = {
+                status: "Chờ xác nhận",
+            };
+            try {
+                await updateOrder(id, data); // Gọi API cập nhật trạng thái đơn hàng
+                setStatusOrder(!statusOrder); // Thay đổi trạng thái để kích hoạt `useEffect`
+            } catch (err) {
+                console.error("Error updating order:", err);
+            }
+        };        
     const columns = [
         {
             id: 1,
@@ -89,12 +113,26 @@ const Orders = () => {
         {
             id: 6,
             name: "Lựa chọn",
-            cell: (row) => (
-                <button className={row.status === "Chờ xác nhận" ? "cancel-order" : "finish-order"}>
-                    {row.status === "Chờ xác nhận" ? "Hủy" : "Hoàn thành"}
-                </button>
-            ),
-        },
+            // cell: (row) => (
+                // row.status === "Chờ xác nhận" ? 
+                //     <button className="cancel-order" onClick={() => handleCancel(row.order_id)}>Hủy</button> 
+                //     : row.status === "Đang giao" ? 
+                //         <button className="finish-order" disabled>Xác nhận</button>
+                //         :<button className="finish-order" disabled>Xác nhận</button>
+            // ),
+            cell :row => {
+                if(row.status === "Chờ xác nhận"){
+                    return <button className="cancel-order" onClick={() => handleCancel(row.order_id)}>Hủy</button> 
+                }else if(row.status === "Đã hủy"){
+                    return <button className="finish-order" onClick={() => handleReOrder(row.order_id)}>Đặt lại</button> 
+                }else{
+                    return row.status === "Đang giao" ? 
+                            <button className="finish-order" disabled>Xác nhận</button>
+                            :<button className="finish-order" disabled>Xác nhận</button>
+                }
+            }
+        }
+        
     ];
 
     const menu = [

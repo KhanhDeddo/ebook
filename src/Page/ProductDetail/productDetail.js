@@ -397,7 +397,7 @@ const BookDetails = ({ onCartUpdated }) => {
                                       </div>
                                     </label>
                                     <label>
-                                        <h4>Tổng tiền: {totalPrice}.000VND</h4>
+                                        <h4>Tổng tiền: {totalPrice}0VND</h4>
                                     </label>
                                     <div className="modal-actions">
                                         <button
