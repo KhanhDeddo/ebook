@@ -90,7 +90,7 @@ const Orders = () => {
             id: 6,
             name: "Lựa chọn",
             cell: (row) => (
-                <button className={row.status === "Chờ xác nhận" ? "" : "finish-order"}>
+                <button className={row.status === "Chờ xác nhận" ? "cancel-order" : "finish-order"}>
                     {row.status === "Chờ xác nhận" ? "Hủy" : "Hoàn thành"}
                 </button>
             ),
