@@ -73,7 +73,18 @@ const Orders = () => {
             } catch (err) {
                 console.error("Error updating order:", err);
             }
-        };        
+        }; 
+        const handleFinish = async (id) => {
+            const data = {
+                status: "Hoàn thành",
+            };
+            try {
+                await updateOrder(id, data); // Gọi API cập nhật trạng thái đơn hàng
+                setStatusOrder(!statusOrder); // Thay đổi trạng thái để kích hoạt `useEffect`
+            } catch (err) {
+                console.error("Error updating order:", err);
+            }
+        };            
     const columns = [
         {
             id: 1,
@@ -127,7 +138,7 @@ const Orders = () => {
                     return <button className="re-order" onClick={() => handleReOrder(row.order_id)}>Đặt lại</button> 
                 }else{
                     return row.status === "Đang giao" ? 
-                            <button className="finish-order" disabled>Hoàn thành</button>
+                            <button className="finish-order" onClick={() => handleFinish(row.order_id)}>Hoàn thành</button>
                             :<button className="finish-order" disabled>Hoàn thành</button>
                 }
             }
