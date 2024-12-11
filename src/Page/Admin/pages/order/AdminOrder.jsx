@@ -20,8 +20,8 @@ const AdminOrder = () => {
 		const data = await getOrders({"search" : value});
 		setlistData(data)
 	};
-
-	const CONFIRM_STATUS = "Xác nhận";
+	const [count,setCount] = useState(0)
+	const CONFIRM_STATUS = ["Chờ vận chuyển","Đang giao"]
 
 	useEffect(()=>{
 		loadDataGrid(search);
@@ -107,12 +107,14 @@ const AdminOrder = () => {
 	}
 
 	const hanldeConfirm = async () => {
-		rowSelected.status = CONFIRM_STATUS;
+		rowSelected.status === "Chờ xác nhận" && setCount(0)
+		rowSelected.status = CONFIRM_STATUS[count];
 		var data = await updateStatusOrder(rowSelected);
 		setshowPopup(false);
 		loadDataGrid(search);
 		alert("Cập nhật thành công");
 		console.log(data);
+		setCount(1)
 	}
 
 	return (
@@ -170,7 +172,11 @@ const AdminOrder = () => {
 						<div className='item'> Trạng thái: {rowSelected.status}</div>
 					</div>
 					<div className='footer-popup'>
-						{rowSelected.status != CONFIRM_STATUS 
+						{rowSelected.status === "Chờ xác nhận" 
+						&& 
+						<button className='button' onClick={hanldeConfirm}>Xác nhận</button>
+						}
+						{rowSelected.status === CONFIRM_STATUS[0]
 						&& 
 						<button className='button' onClick={hanldeConfirm}>Xác nhận</button>
 						}

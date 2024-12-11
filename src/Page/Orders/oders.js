@@ -124,11 +124,11 @@ const Orders = () => {
                 if(row.status === "Chờ xác nhận"){
                     return <button className="cancel-order" onClick={() => handleCancel(row.order_id)}>Hủy</button> 
                 }else if(row.status === "Đã hủy"){
-                    return <button className="finish-order" onClick={() => handleReOrder(row.order_id)}>Đặt lại</button> 
+                    return <button className="re-order" onClick={() => handleReOrder(row.order_id)}>Đặt lại</button> 
                 }else{
                     return row.status === "Đang giao" ? 
-                            <button className="finish-order" disabled>Xác nhận</button>
-                            :<button className="finish-order" disabled>Xác nhận</button>
+                            <button className="finish-order" disabled>Hoàn thành</button>
+                            :<button className="finish-order" disabled>Hoàn thành</button>
                 }
             }
         }

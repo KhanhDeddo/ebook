@@ -85,16 +85,32 @@
     }
 }
 .cancel-order{
-    width: 45%;
-    height: 30px;
-    background-color: #ff0000b7;
-    border: 1px solid #ff0000b7;
+    width: 100%;
+    height: 70%;
+    background-color: rgb(255, 0, 0);
+    border: 1px solid rgb(255, 0, 0);
     font-size: 15px;
     font-weight: bold;
     align-items: center;
     border-radius: 5px;
     color:white;
-    margin-left: 30px;
+    padding: 5px;
+}
+
+.re-order{
+    // display: flex;
+    width: 100%;
+    height: 70%;
+    background-color: orange;
+    border: 1px solid orange;
+    font-size: 15px;
+    font-weight: bold;
+    align-items: center;
+    border-radius: 5px;
+    color:white;
+    padding: 5px;
+    // margin-left: 30px;
+
 }
 
 .finish-order{
