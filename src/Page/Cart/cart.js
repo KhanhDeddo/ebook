@@ -5,6 +5,9 @@ import { useLocation } from "react-router-dom";
 import { fetchBooks } from "../../Api/getListBook";
 import { NavBar } from "../../Components/Navbar/navbar";
 import { createOrder } from "../../Api/createOrder";
+import { createCartItem } from "../../Api/createCartItem";
+import { createOrderItem } from "../../Api/createOrderItem";
+import { fetcOrders } from "../../Api/getListOrder";
 
 export const CartPage = () => {
   const location = useLocation();
@@ -15,6 +18,7 @@ export const CartPage = () => {
   const [selectedBookIds, setSelectedBookIds] = useState([]); // State cho các book_id được chọn
   const [listBook, setListBook] = useState([]); // State cho các book_id được chọn
   const [payment,setPayment] = useState(false);
+  const [listOrder,setListOrder] = useState([]);
  
   // Tính tổng tiền
   const total = selectedBookIds.reduce(
@@ -100,6 +104,19 @@ export const CartPage = () => {
         : [...prevSelected, book_id]
     );
   };
+  useEffect(() => {
+    if (user) {
+        const loadDataOrders = async () => {
+            try {
+                const data = await fetcOrders(user.user_id);
+                setListOrder(data);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        loadDataOrders();
+    }
+}, [user]);
   const [order, setOrder] = useState({});
   useEffect(() => {
     if (user) {
@@ -128,9 +145,20 @@ export const CartPage = () => {
         await createOrder(order);
         alert("Đơn hàng được đặt thành công.")
         selectedBookIds.map((item) => {
+          //(order_id,book_id,quantity,price_per_item,total_price)
+          const book = {
+            order_id: listOrder.length+1,
+            book_id: item.book_id,
+            quantity: item.quantity,
+            price_per_item: item.price_at_purchase/item.quantity,
+            total_price: item.price_at_purchase,
+            };
+          console.log(book)          
+          createOrderItem(book);
           deleteCartItem(item.cart_id,item.book_id)
           return(<></>)
         })
+        
         setPayment(false)
     } catch (error) {
       alert(`Lỗi khi thêm vào giỏ hàng: ${error.message}`);
