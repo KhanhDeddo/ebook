@@ -129,10 +129,10 @@ const BookDetails = ({ onCartUpdated }) => {
           //(order_id,book_id,quantity,price_per_item,total_price)
         const bookorder = {
           order_id: listOrder.length+1,
-          book_id: book.book_id,
-          quantity: book.quantity,
-          price_per_item: book.price_at_purchase/book.quantity,
-          total_price: book.price_at_purchase,
+          book_id: book.id,
+          quantity: quantity,
+          price_per_item: totalPrice/quantity,
+          total_price: totalPrice,
           };
         console.log(bookorder)          
         createOrderItem(bookorder);
