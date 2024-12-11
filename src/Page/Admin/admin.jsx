@@ -55,7 +55,8 @@ export const AdminHome = () => {
 				</div>
 				<div className="stats-card">
 					<h3>Tổng số sản phẩm</h3>
-					<p className="stats-value">{dashboard?.item}</p>
+					{/* <p className="stats-value">{dashboard?.item}</p> */}
+					<p className="stats-value">{dashboard?.book}</p>
 				</div>
 				<div className="stats-card">
 					<h3>Tổng người dùng</h3>
