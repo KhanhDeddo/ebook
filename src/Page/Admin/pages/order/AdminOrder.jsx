@@ -172,7 +172,7 @@ const AdminOrder = () => {
 					<div className='footer-popup'>
 						{rowSelected.status != CONFIRM_STATUS 
 						&& 
-						<button  onClick={hanldeConfirm}>Xác nhận</button>
+						<button className='button' onClick={hanldeConfirm}>Xác nhận</button>
 						}
 					</div>
 				</div>

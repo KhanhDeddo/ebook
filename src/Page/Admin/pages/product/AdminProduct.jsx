@@ -229,7 +229,7 @@ const AdminProduct = () => {
 
 					</div>
 					<div className='footer-popup'>
-						<button onClick={hanldeConfirm}>Lưu</button>
+						<button className='button' onClick={hanldeConfirm}>Lưu</button>
 					</div>
 				</div>
 			</div>
