@@ -10,6 +10,8 @@ import { createCartItem } from "../../Api/createCartItem";
 import { fetchCartItem } from "../../Api/getCartItem";
 import { updateCartItem } from "../../Api/updateCartItem";
 import { createOrder } from "../../Api/createOrder";
+import { createOrderItem } from "../../Api/createOrderItem";
+import { fetcOrders } from "../../Api/getListOrder";
 
 
 const BookDetails = ({ onCartUpdated }) => {
@@ -101,11 +103,39 @@ const BookDetails = ({ onCartUpdated }) => {
       });
     }
   }, [user,totalPrice]);
+
+
+  const [listOrder,setListOrder] = useState([]);
+  useEffect(() => {
+      if (user) {
+          const loadDataOrders = async () => {
+              try {
+                  const data = await fetcOrders(user.user_id);
+                  setListOrder(data);
+              } catch (err) {
+                  console.error(err);
+              }
+          };
+          loadDataOrders();
+      }
+  }, [user]);
+
   const handConfirm = async () => {
     try {
         // Gửi yêu cầu POST tới API để thêm CartItem
         await createOrder(order);
         alert("Đơn hàng được đặt thành công.")
+       
+          //(order_id,book_id,quantity,price_per_item,total_price)
+        const bookorder = {
+          order_id: listOrder.length+1,
+          book_id: book.book_id,
+          quantity: book.quantity,
+          price_per_item: book.price_at_purchase/book.quantity,
+          total_price: book.price_at_purchase,
+          };
+        console.log(bookorder)          
+        createOrderItem(bookorder);
         setPayment(false)
     } catch (error) {
       alert(`Lỗi khi thêm vào giỏ hàng: ${error.message}`);
