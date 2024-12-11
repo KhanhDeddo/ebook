@@ -17,5 +17,6 @@ export const ROUTER = {
 		ADD_PRODUCT: 'admin/add-product',
 		PROFILE: 'admin/profile',
 		WALLET: 'admin/wallet',
+        USER:'admin/user'
 	},
 }

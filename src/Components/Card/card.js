@@ -6,7 +6,7 @@ import { ROUTER } from "../../Utils/router";
 
 const { Meta } = Card;
 
-export const CardBook = ({ id, title, image, price,width=210,height=400,sizef=20 }) => {
+export const CardBook = ({ id, title, image, price,width=210,height=400,sizef=20,width_img=210,height_img=300 }) => {
   const navigate = useNavigate(); // Điều hướng khi nhấn vào CardBook
   const idbook = id
   const handleCardClick = () => {
@@ -18,7 +18,7 @@ export const CardBook = ({ id, title, image, price,width=210,height=400,sizef=20
     <Card
       hoverable
       style={{ width: width,height:height }}
-      cover={<img alt="book" src={image} />}
+      cover={<img alt="book" src={image} width={width_img} height={height_img} />}
       onClick={handleCardClick} // Gắn sự kiện click
     >
       <div className="title" style={{fontSize:sizef}}>

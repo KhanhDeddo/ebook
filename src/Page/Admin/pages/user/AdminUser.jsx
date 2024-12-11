@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import './AdminProduct.scss';
+import './AdminUser.scss';
 import DataTable from "react-data-table-component";
-import { addProduct, getProducts, updateProduct, updateStatusOrder } from '../../../../Api/apiAdmin';
+import { addProduct, addUser, getProducts, getUsers, updateProduct, updateStatusOrder, updateUser } from '../../../../Api/apiAdmin';
 
-const AdminProduct = () => {
+const AdminUser = () => {
     const [listData,setlistData] = useState([]);
 
 	const [search, setSearch] = useState('');
@@ -15,7 +15,7 @@ const AdminProduct = () => {
 	const [showPopup, setshowPopup] = useState(false);
 
 	const loadDataGrid = async(value) => {
-		const data = await getProducts({"search" : value});
+		const data = await getUsers({"search" : value});
 		setlistData(data)
 	};
 
@@ -33,42 +33,36 @@ const AdminProduct = () => {
 
 	const columns = [
 		{
-		  id: 1,
-		  name: "ID",
-		  selector: (row) => row.id,
-		  reorder: true
-		},
-		{
 		  id: 2,
-		  name: "Tiêu đề",
-		  selector: (row) => row.title,
+		  name: "Tên người dùng",
+		  selector: (row) => row.user_name,
 		  reorder: true
 		},
 		{
 			id: 3,
-			name: "Tác giả",
-			selector: (row) => row.author,
+			name: "Email",
+			selector: (row) => row.user_email,
 			right: true,
 			reorder: true
 		},
 		{
 			id: 4,
-			name: "Giá tiền",
-			selector: (row) => row.price,
+			name: "Số điện thoại",
+			selector: (row) => row.user_phone,
 			right: true,
 			reorder: true
 		},
 		{
 			id: 5,
-			name: "Loại danh mục",
-			selector: (row) => row.category,
+			name: "Giới tính",
+			selector: (row) => row.user_gender,
 			right: true,
 			reorder: true
 		},
 		{
 			id: 6,
-			name: "Số lượng trong kho",
-			selector: (row) => row.stock_quantity,
+			name: "Địa chỉ",
+			selector: (row) => row.user_address,
 			right: true,
 			reorder: true
 		},
@@ -77,60 +71,40 @@ const AdminProduct = () => {
 
 	const list_detail = [
 		{
-			name: 'Tiêu đề',
-			property: 'title',
+			name: 'Tên người dùng',
+			property: 'user_name',
 			type: 'text'
 		},
 		{
-			name: 'Tác giả',
-			property: 'author',
+			name: 'Email',
+			property: 'user_email',
 			type: 'text'
 
 		},
 		{
-			name: 'Chi tiết',
-			property: 'description',
+			name: 'Số điện thoại',
+			property: 'user_phone',
 			type: 'text'
 		},
 		{
-			name: 'Giá tiền',
-			property: 'price',
-			type: 'number'
-		},
-		{
-			name: 'Link ảnh',
-			property: 'image_url',
+			name: 'Giới tính',
+			property: 'user_gender',
 			type: 'text'
 		},
 		{
-			name: 'Danh mục',
-			property: 'category',
-			type: 'text'
-		},
-		{
-			name: 'Lớp',
-			property: 'level_class',
-			type: 'text'
-		},
-		{
-			name: 'Level trường',
-			property: 'level_school',
-			type: 'text'
-		},
-		{
-			name: 'Số sách trong kho',
-			property: 'stock_quantity',
-			type: 'number'
-		},
-		{
-			name: 'Người phát hành',
-			property: 'publisher',
-			type: 'text'
-		},
-		{
-			name: 'Ngày phát hành',
-			property: 'publication_date',
+			name: 'Ngày sinh',
+			property: 'user_date_of_birth',
 			type: 'date'
+		},
+		{
+			name: 'Địa chỉ',
+			property: 'user_address',
+			type: 'text'
+		},
+		{
+			name: 'Là admin',
+			property: 'user_is_admin',
+			type: 'checkbox'
 		},
 	];
 
@@ -149,7 +123,7 @@ const AdminProduct = () => {
 	}
 
 	const handleSearch = async (e) => {
-		console.log(e.target?.value)
+		console.log(e.target?.value);
 		if(e.target.value) {
 			await loadDataGrid(e.target.value);
 		}else {
@@ -169,10 +143,17 @@ const AdminProduct = () => {
 	}
 
 	const hanldeConfirm = async () => {
+		console.log(rowSelected);
+		// if (rowSelected.user_is_admin === 'true') {
+		// 	rowSelected.user_is_admin = 1;
+		// }
+		// else {
+		// 	rowSelected.user_is_admin = 0;
+		// }
 		if (statePopup === STATE_ADD) {
-			var res = await addProduct(rowSelected);
+			var res = await addUser(rowSelected);
 		}else {
-			var res = await updateProduct(rowSelected);
+			var res = await updateUser(rowSelected);
 		}
 		if (res) {
 			setshowPopup(false);
@@ -190,12 +171,16 @@ const AdminProduct = () => {
 	}
 
 	const handleChange = (event, property) => {
-		setrowSelected({ ...rowSelected, [property]: event.target.value });
+		var value = event.target.value;
+		if (property == 'user_is_admin') {
+			value = event.target.checked 
+		}
+		setrowSelected({ ...rowSelected, [property]: value });
 	  };
 
 	return (
 		<div className=''>
-			<div className="home-title">Sản phẩm</div>
+			<div className="home-title">Người dùng</div>
 			<div className='header-page'>
 				<button onClick={handleAdd}>Thêm mới</button>
 				<input placeholder='Tìm kiếm' className='input input-search' onChange={handleSearch} />
@@ -214,7 +199,7 @@ const AdminProduct = () => {
 				<div className='popup' >
 				<div className="popup-content">
 					<div className='header-popup flex-center'>
-						<div>Chi tiết sách</div>
+						<div>Chi tiết người dùng</div>
 						<div onClick={() => setshowPopup(false)}>X</div>
 					</div>
 					<div className='body-popup'>
@@ -238,4 +223,4 @@ const AdminProduct = () => {
 	);
 };
 
-export default AdminProduct;
+export default AdminUser;

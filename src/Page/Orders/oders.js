@@ -1,122 +1,162 @@
 import React, { useEffect, useState } from "react";
-import "./orders.scss"
-import { NavBar } from "../../Components/Navbar/navbar";
-import { useLocation } from "react-router-dom";
+import "./orders.scss";
+import DataTable from "react-data-table-component";
 import { fetcOrders } from "../../Api/getListOrder";
+import { NavBar } from "../../Components/Navbar/navbar";
 
-export const Orders = () => {
-    const location = useLocation();
+const Orders = () => {
     const [user, setUser] = useState(null);
-    const [listOrder,setListOrder] = useState([])
-    useEffect(() => {
-    const storedUser = localStorage.getItem("user"); // Lấy thông tin người dùng từ localStorage
-    if (storedUser) {
-      setUser(JSON.parse(storedUser)); // Chuyển đổi chuỗi JSON thành đối tượng
-    }
-    }, [location]);
-    useEffect(()=>{
-        if(user){
-            const loadDataOrders = async() => {
-                try{
-                    const data = await fetcOrders(user.user_id);
-                    setListOrder(data)
-                }catch(err){
+    const [listOrder, setListOrder] = useState([]);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [filterStatus, setFilterStatus] = useState("");
+    const [keyTable, setKeyTable] = useState(1);
 
-                }
-            };loadDataOrders();console.log(listOrder)
+    useEffect(() => {
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+            setUser(JSON.parse(storedUser));
         }
-    })
+    }, []);
+
+    useEffect(() => {
+        if (user) {
+            const loadDataOrders = async () => {
+                try {
+                    const data = await fetcOrders(user.user_id);
+                    setListOrder(data);
+                } catch (err) {
+                    console.error(err);
+                }
+            };
+            loadDataOrders();
+        }
+    }, [user]);
+
+    const handleSearch = (e) => {
+        setSearchTerm(e.target.value);
+        setKeyTable(keyTable + 1);
+    };
+
+    const handleFilterStatus = (status) => {
+        setFilterStatus(status);
+        setKeyTable(keyTable + 1);
+    };
+
+    const filteredOrders = listOrder
+        .filter((order) => {
+            const matchesSearchTerm = order.order_id.toString().includes(searchTerm);
+            const matchesStatus = filterStatus ? order.status === filterStatus : true;
+            return matchesSearchTerm && matchesStatus;
+        })
+        .sort((a, b) => new Date(b.order_date) - new Date(a.order_date));
+
+    const columns = [
+        {
+            id: 1,
+            name: "Mã đơn hàng",
+            selector: (row) => row.order_id,
+            sortable: true,
+        },
+        {
+            id: 2,
+            name: "Ngày đặt đơn",
+            selector: (row) => new Date(row.order_date).toLocaleString(),
+            sortable: true,
+        },
+        {
+            id: 3,
+            name: "Tổng tiền",
+            selector: (row) => row.total_price,
+            sortable: true,
+        },
+        {
+            id: 4,
+            name: "Trạng thái",
+            selector: (row) => row.status,
+        },
+        {
+            id: 5,
+            name: "Địa chỉ nhận hàng",
+            cell: (row) => (
+                <div>
+                    {/* <p>Tên: {row.recipient_name}</p>
+                    <p>SĐT: {row.recipient_phone}</p>
+                    <p>Email: {row.recipient_email}</p> */}
+                    <p>{row.shipping_address}</p>
+                </div>
+            ),
+        },
+        {
+            id: 6,
+            name: "Lựa chọn",
+            cell: (row) => (
+                <button className={row.status === "Chờ xác nhận" ? "" : "finish-order"}>
+                    {row.status === "Chờ xác nhận" ? "Hủy" : "Hoàn thành"}
+                </button>
+            ),
+        },
+    ];
+
     const menu = [
-        {
-            name:"Chờ xác nhận",
-        },
-        {
-            name:"Chờ vận chuyển",
-        },
-        {
-            name:"Đang giao",
-        },
-        {
-            name:"Hoàn thành",
-        },
-        {
-            name:"Đã hủy",
-        },
-    ]
-    return(
+        { name: "Tất cả", status: "" },
+        { name: "Chờ xác nhận", status: "Chờ xác nhận" },
+        { name: "Chờ vận chuyển", status: "Chờ vận chuyển" },
+        { name: "Đang giao", status: "Đang giao" },
+        { name: "Hoàn thành", status: "Hoàn thành" },
+        { name: "Đã hủy", status: "Đã hủy" },
+    ];
+
+    const paginationComponentOptions = {
+        rowsPerPageText: "Số dòng mỗi trang:",
+        rangeSeparatorText: "trong",
+        selectAllRowsItem: true,
+        selectAllRowsItemText: "Tất cả",
+    };
+
+    return (
         <div className="container">
-            <NavBar name = "Đơn hàng"/>
-            {user?
-                <div className="row">
-                    <div className="col-lg-3">
-                        <div className="navbar-orders">
-                            <div className="search-orders">
-                                <h3>Tìm kiếm</h3>
-                                <input placeholder="Nhập mã đơn hàng"/>
-                            </div>
-                            <div>
-                            <ul>
-                                { 
-                                    menu.map((item,key_item) => (
-                                        <li key={key_item}>{item.name}</li>
-                                    ))
-                                }
-                            </ul>
+            <NavBar name="Đơn hàng" />
+            {user ? (
+                <div className="orders-container">
+                    <div className="row">
+                        <div className="col-lg-3 navbar-orders">
+                            <div className="filter-bar">
+                                <input
+                                    className="input-search"
+                                    placeholder="Tìm kiếm mã đơn hàng"
+                                    value={searchTerm}
+                                    onChange={handleSearch}
+                                />
+                                <ul className="filter-menu">
+                                    {menu.map((item, index) => (
+                                        <li
+                                            key={index}
+                                            className={filterStatus === item.status ? "active" : ""}
+                                            onClick={() => handleFilterStatus(item.status)}
+                                        >
+                                            {item.name}
+                                        </li>
+                                    ))}
+                                </ul>
                             </div>
                         </div>
-                    </div>
-                    <div className="col-lg-9">
-                        <div>
-                            <div className="header-orders">
-                                <div className="col-lg-2">
-                                    Mã đơn hàng</div>
-                                <div className="col-lg-2">
-                                    Ngày đặt đơn</div>
-                                <div className="col-lg-2">
-                                    Tổng tiền</div>
-                                <div className="col-lg-2">
-                                    Trạng thái</div>
-                                <div className="col-lg-2">
-                                    Thông tin người nhận</div>
-                                <div className="col-lg-2">
-                                    Lựa chọn</div>
-                            </div>
-                            <div>
-                                {listOrder.map((order,key_order)=>{
-                                    return(
-                                        <div className="order" key={key_order}>
-                                            <div className="col-lg-2">
-                                                A
-                                                {order.user_id}
-                                                {order.order_id}
-                                                {order.order_id}
-
-                                            </div>
-                                            <div className="col-lg-2">{new Date(order.order_date).toLocaleString()}</div>
-                                            <div className="col-lg-2">{order.total_price}</div>
-                                            <div className="col-lg-2">{order.status}</div>
-                                            <div className="col-lg-2">
-                                                <div className="infor">
-                                                    <p>Tên:{order.recipient_name}, </p>
-                                                    <p>SĐT:{order.recipient_phone},</p>
-                                                    <p>Email:{order.recipient_email},</p>
-                                                    <p>Địa chỉ: {order.shipping_address}</p>
-                                                </div>
-                                            </div>
-                                            {order.status==="Chờ xác nhận" ?
-                                                <div className="col-lg-2 cancel-order"><button>Hủy</button></div>
-                                                :<div className="col-lg-2 finish-order"><button>Hoàn thành</button></div>
-                                            }
-                                        </div>
-                                    )
-                                })
-                                }
-                            </div>
+                        <div className="col-lg-9 ">
+                            <DataTable className="order"
+                                key={keyTable}
+                                columns={columns}
+                                data={filteredOrders}
+                                pagination
+                                paginationComponentOptions={paginationComponentOptions}
+                                defaultSortFieldId={2}
+                            />
                         </div>
                     </div>
                 </div>
-                :<div>Vui lòng đăng nhập để thực hiện chức năng này....</div>
-            }
+            ) : (
+                <div>Vui lòng đăng nhập để thực hiện chức năng này....</div>
+            )}
         </div>
-    )
-}
+    );
+};
+
+export default Orders;

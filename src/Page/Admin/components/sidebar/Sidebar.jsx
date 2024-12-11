@@ -2,11 +2,9 @@ import React from 'react';
 import './Sidebar.scss';
 import { IoMdHome } from 'react-icons/io';
 import { IoCart } from 'react-icons/io5';
-import { IoIosWallet } from 'react-icons/io';
 import { IoBagCheck } from 'react-icons/io5';
-import { MdLibraryAdd } from 'react-icons/md';
 import { FaUser } from 'react-icons/fa';
-import { Link, NavLink, useLocation } from 'react-router-dom';
+import {NavLink, useLocation } from 'react-router-dom';
 
 const Sidebar = () => {
 	const { pathname } = useLocation();
@@ -25,29 +23,35 @@ const Sidebar = () => {
 			icon: <IoCart />,
 			link: '/admin/order',
 		},
-		{
-			id: 3,
-			title: 'Ví',
-			icon: <IoIosWallet />,
-			link: '/admin/wallet',
-		},
+		// {
+		// 	id: 3,
+		// 	title: 'Ví',
+		// 	icon: <IoIosWallet />,
+		// 	link: '/admin/wallet',
+		// },
 		{
 			id: 4,
 			title: 'Sản phẩm',
 			icon: <IoBagCheck />,
 			link: '/admin/product',
 		},
+		// {
+		// 	id: 5,
+		// 	title: 'Thêm sản phẩm',
+		// 	icon: <MdLibraryAdd />,
+		// 	link: '/admin/add-product',
+		// },
+		// {
+		// 	id: 6,
+		// 	title: 'Hồ sơ của tôi',
+		// 	icon: <FaUser />,
+		// 	link: '/admin/profile',
+		// },
 		{
-			id: 5,
-			title: 'Thêm sản phẩm',
-			icon: <MdLibraryAdd />,
-			link: '/admin/add-product',
-		},
-		{
-			id: 6,
-			title: 'Hồ sơ của tôi',
+			id: 7,
+			title: 'Quản lý người dùng',
 			icon: <FaUser />,
-			link: '/admin/profile',
+			link: '/admin/user',
 		},
 	];
 

@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from "react";
 import "./cart.scss";
 import { fetchListCart } from "../../Api/getCart"; // Giả sử fetchListCart trả về dữ liệu giỏ hàng
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { fetchBooks } from "../../Api/getListBook";
 import { NavBar } from "../../Components/Navbar/navbar";
 import { createOrder } from "../../Api/createOrder";
-import { ROUTER } from "../../Utils/router";
 
 export const CartPage = () => {
-  const navigete = useNavigate();
   const location = useLocation();
   const [user, setUser] = useState(null);
   const [listCartItem, setListCartItem] = useState([]);
@@ -72,7 +70,7 @@ export const CartPage = () => {
 
       const result = await response.json();
       console.log("Delete successful:", result);
-      alert(`Item with id ${book_id} deleted successfully!`);
+      // alert(`Item with id ${book_id} deleted successfully!`);
 
       // Cập nhật danh sách giỏ hàng bằng cách loại bỏ item vừa xóa
       setListCartItem((prevList) =>
@@ -128,6 +126,12 @@ export const CartPage = () => {
     try {
         // Gửi yêu cầu POST tới API để thêm CartItem
         await createOrder(order);
+        alert("Đơn hàng được đặt thành công.")
+        selectedBookIds.map((item) => {
+          deleteCartItem(item.cart_id,item.book_id)
+          return(<></>)
+        })
+        setPayment(false)
     } catch (error) {
       alert(`Lỗi khi thêm vào giỏ hàng: ${error.message}`);
       console.error("Lỗi thêm vào giỏ hàng:", error);
@@ -142,14 +146,13 @@ export const CartPage = () => {
     e.preventDefault();
     handConfirm();
     console.log('Form Data:',order);
-    navigete(ROUTER.USER.ORDERS)
   };
   return (
     <div className="container">
       <NavBar name ="Giỏ hàng"/>
       {user?
-        <div>
-                 <div className="row">
+      <div>
+        <div className="row">
         <div className="col-lg-9">
           <div className="row cart-title">
             <div className="col-lg-15">

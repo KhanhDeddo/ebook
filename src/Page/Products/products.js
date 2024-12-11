@@ -150,8 +150,10 @@ export const Products = () => {
                   title={book.title}
                   image={book.image_url}
                   price={book.price}
-                  width={149}
-                  height={290}
+                  width={187}
+                  height={310}
+                  width_img={187}
+                  height_img={210}
                   sizef={14}
                 />
               ))

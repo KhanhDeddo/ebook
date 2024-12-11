@@ -94,8 +94,8 @@ const Header = () => {
 
   useEffect(() => {
     loadListCart();
-  },);
-// },[user]);
+  // },);
+},[user]);
 
   // // Hàm callback để cập nhật giỏ hàng
   // const onCartUpdated = () => {

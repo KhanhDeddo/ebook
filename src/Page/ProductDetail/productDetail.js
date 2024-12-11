@@ -9,6 +9,7 @@ import { CardBook } from "../../Components/Card/card";
 import { createCartItem } from "../../Api/createCartItem";
 import { fetchCartItem } from "../../Api/getCartItem";
 import { updateCartItem } from "../../Api/updateCartItem";
+import { createOrder } from "../../Api/createOrder";
 
 
 const BookDetails = ({ onCartUpdated }) => {
@@ -20,6 +21,7 @@ const BookDetails = ({ onCartUpdated }) => {
   const [isOutOfStock, setIsOutOfStock] = useState(false);
   const [user, setUser] = useState(null);
   const location = useLocation();
+  const [payment,setPayment] = useState(false);
 
   // Lấy thông tin người dùng từ localStorage
   useEffect(() => {
@@ -27,6 +29,7 @@ const BookDetails = ({ onCartUpdated }) => {
     if (storedUser) setUser(JSON.parse(storedUser));
   }, [location]);
 
+  
   // Gọi API lấy danh sách sách
   useEffect(() => {
     const loadBooks = async () => {
@@ -84,6 +87,41 @@ const BookDetails = ({ onCartUpdated }) => {
   // Tính tổng tiền
   const totalPrice = (parseFloat(book?.price || 0) * quantity).toFixed(2);
 
+  const [order, setOrder] = useState({});
+  useEffect(() => {
+    if (user) {
+      setOrder({
+        user_id : user.user_id,
+        recipient_name: user.user_name || "",
+        recipient_email: user.user_email || "",
+        recipient_phone: user.user_phone || "",
+        shipping_address: user.user_address || "",
+        payment_method: "",
+        total_price: totalPrice,
+      });
+    }
+  }, [user,totalPrice]);
+  const handConfirm = async () => {
+    try {
+        // Gửi yêu cầu POST tới API để thêm CartItem
+        await createOrder(order);
+        alert("Đơn hàng được đặt thành công.")
+        setPayment(false)
+    } catch (error) {
+      alert(`Lỗi khi thêm vào giỏ hàng: ${error.message}`);
+      console.error("Lỗi thêm vào giỏ hàng:", error);
+    }
+  };
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setOrder((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    handConfirm();
+    console.log('Form Data:',order);
+  };
   // Thêm hoặc cập nhật sách trong giỏ hàng
   const handleAddCartAction = async () => {
     if (isOutOfStock) {
@@ -130,7 +168,7 @@ const BookDetails = ({ onCartUpdated }) => {
     } else if (!user) {
       alert("Bạn chưa đăng nhập, vui lòng đăng nhập!");
     } else {
-      alert(`Đã mua ${book.title} thành công!`);
+      setPayment(true)
     }
   };
 
@@ -213,25 +251,146 @@ const BookDetails = ({ onCartUpdated }) => {
       <div className="similar-books">
         <h2>Sản phẩm tương tự</h2>
         <Carousel responsive={responsive}>
-  {books.map((book) => (
-    <div
-      key={book.id}
-      onClick={() => handleSimilarBookClick(book.id)}
-      style={{ cursor: "pointer" }}
-    >
-      <CardBook
-        id={book.id}
-        title={book.title}
-        image={book.image_url}
-        price={book.price}
-        width={150}
-        height={290}
-        sizef={14}
-      />
-    </div>
-  ))}
-</Carousel>
-
+          {books.map((book) => (
+            <div
+              key={book.id}
+              onClick={() => handleSimilarBookClick(book.id)}
+              style={{ cursor: "pointer" }}
+            >
+              <CardBook
+                id={book.id}
+                title={book.title}
+                image={book.image_url}
+                price={book.price}
+                width={160}
+                height={290}
+                width_img={160}
+                height_img={210}
+                sizef={14}
+              />
+            </div>
+          ))}
+        </Carousel>
+        {/* Modal cập nhật thông tin */}
+      {payment && (
+                    <div className="payment">
+                        <div className="modal-content">
+                            <div className="row">
+                              <div className="col-lg-6">
+                                <h3>Danh sách mặt hàng</h3>
+                                <div>
+                                  {!book?
+                                      (
+                                        <div key={book.book_id}>
+                                          <p>Không tìm thấy thông tin sách cho ID: {book.book_id}</p>
+                                        </div>
+                                      )
+                                    :
+                                    (
+                                      <div key={book.book_id}>
+                                        <div className="row cart-item-order">
+                                            <div className="col-lg-24 ">
+                                              <img src={book.image_url} alt={book.title} className="image-book" />
+                                            </div>
+                                            <div className="col-lg-24">
+                                              <p>{book.title}</p>
+                                            </div>
+                                            <div className="col-lg-24">
+                                              <p>{book.price}</p>
+                                            </div>
+                                            <div className="col-lg-24">
+                                              <p>{quantity}</p>
+                                            </div>
+                                            <div className="col-lg-24">
+                                              <p>{totalPrice}</p>
+                                            </div>
+                                          </div>
+                                      </div>
+                                    )
+                                  }
+                              </div>
+                              </div>
+                              <div className="col-lg-6">
+                                <h3>Thông tin đặt hàng</h3>
+                                <form>
+                                    <label>
+                                        Tên người nhận:
+                                        <input
+                                            type="text"
+                                            name="recipient_name"
+                                            value={order.recipient_name || ""}
+                                            onChange={handleInputChange}
+                                        />
+                                    </label>
+                                    <label>
+                                        Email người nhận:
+                                        <input
+                                            type="email"
+                                            name="recipient_email"
+                                            value={order.recipient_email || ""}
+                                            onChange={handleInputChange}
+                                        />
+                                    </label>
+                                    <label>
+                                        Số điện thoại người nhận:
+                                        <input
+                                            type="text"
+                                            name="recipient_phone"
+                                            value={order.recipient_phone || ""}
+                                            onChange={handleInputChange}
+                                        />
+                                    </label>
+                                    <label>
+                                        Địa chỉ nhận hàng:
+                                        <input
+                                            type="text"
+                                            name="shipping_address"
+                                            value={order.shipping_address || ""}
+                                            onChange={handleInputChange}
+                                        />
+                                    </label>
+                                    <label>
+                                      Phương thức thanh toán:
+                                      <div className="methods-payment">
+                                        <div></div>
+                                        <div>
+                                          <input
+                                            type="radio"
+                                            name="payment_method"
+                                            value={"Thanh toán khi nhận hàng"}
+                                            onChange={handleInputChange}
+                                            checked = {order.payment_method === "Thanh toán khi nhận hàng"}
+                                            required
+                                          />
+                                          <label>Thanh toán khi nhận hàng</label>
+                                        </div>
+                                      </div>
+                                    </label>
+                                    <label>
+                                        <h4>Tổng tiền: {totalPrice}.000VND</h4>
+                                    </label>
+                                    <div className="modal-actions">
+                                        <button
+                                            type="button"
+                                            className="cancel-button"
+                                            onClick={() => setPayment(false)}
+                                        >
+                                            Hủy
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="ok-button"
+                                            onClick={handleSubmit}
+                                        >
+                                            Xác nhận
+                                        </button>
+                                    </div>
+                                </form>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                )}
       </div>
     </div>
   );
