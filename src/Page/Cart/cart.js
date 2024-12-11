@@ -158,6 +158,10 @@ export const CartPage = () => {
           deleteCartItem(item.cart_id,item.book_id)
           return(<></>)
         })
+        selectedBookIds.map((item) => {
+          deleteCartItem(item.cart_id,item.book_id)
+          return(<></>)
+        })
         
         setPayment(false)
     } catch (error) {
