@@ -16,9 +16,9 @@ import AdminProduct from "./Page/Admin/pages/product/AdminProduct";
 import AdminOrder from "./Page/Admin/pages/order/AdminOrder";
 import AdminAddProduct from "./Page/Admin/pages/add-product/AdminAddProduct";
 import AdminProfile from "./Page/Admin/pages/profile/AdminProfile";
-import AdminWallet from "./Page/Admin/pages/wallet/AdminWallet";
 import NotFound from "./Page/Admin/components/NotFound";
 import AdminUser from "./Page/Admin/pages/user/AdminUser";
+import AdminStatistics from "./Page/Admin/pages/statistics/AdminStatistics";
 
 const RenderRouter = () => {
     // route user
@@ -41,7 +41,7 @@ const RenderRouter = () => {
         { path: ROUTER.ADMIN.ORDER, Component: <AdminOrder /> },
         { path: ROUTER.ADMIN.ADD_PRODUCT, Component: <AdminAddProduct /> },
         { path: ROUTER.ADMIN.PROFILE, Component: <AdminProfile /> },
-        { path: ROUTER.ADMIN.WALLET, Component: <AdminWallet /> },
+        { path: ROUTER.ADMIN.STATISTICS, Component: <AdminStatistics /> },
         { path: ROUTER.ADMIN.USER, Component: <AdminUser/>},
         { path: "*", Component: <NotFound /> },
     ];

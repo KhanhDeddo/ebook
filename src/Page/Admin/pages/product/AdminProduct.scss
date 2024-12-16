@@ -1,3 +1,18 @@
+@use "sass:map";
+@import "../../../../Style/Page/theme";
+.custom-switch {
+    &.ant-switch-checked {
+        background-color:map.get($theme-color,"main") !important; // Màu nền khi "Còn hàng"
+    }
+    .ant-switch-inner {
+        color: white; // Màu chữ
+    }
+    &:not(.ant-switch-checked) {
+        background-color: rgba(255, 0, 0, 0.568) !important; // Màu nền khi "Hết hàng"
+    }
+}
+
+
 * {
 	margin: 0;
 	padding: 0;
@@ -143,4 +158,51 @@
 }
 .popup-content{
 	height: 90% !important;
+}
+.btn-update{
+	button{
+		background-color:map.get($theme-color,"main");
+		border: 1px solid;
+		border-radius: 5px;
+		color:white;
+		padding: 5px;
+		font-size: 14px;
+		font-weight: bold;
+		&:hover{
+			background-color: red;
+		}
+	}
+}
+.ad-prd-navbar{
+	display: flex;
+	column-gap: 5px;
+	button{
+		padding: 5px;
+		font-size: 15px;
+		border: 1px solid ;
+		border-radius: 8px;
+		background-color: map.get($theme-color,"main");
+		color:white;
+		&:hover{
+		background-color: orange;
+		}
+	}
+	.active{
+		background-color: red;
+	}
+}
+.input-btn-products{
+	float: right;
+    button{
+        background-color:map.get($theme-color,"main");
+		border: 1px solid;
+		border-radius: 5px;
+		color:white;
+		padding: 5px;
+		font-size: 14px;
+		font-weight: bold;
+		&:hover{
+			background-color: red;
+		}
+    }
 }

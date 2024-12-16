@@ -1,7 +1,10 @@
+@use "sass:map";
+@import '../../../../Style/Page/_theme.scss';
 .admin-header {
 	width: 100%;
 	height: 60px;
-	background-color: #fcf8f8;
+	background-color:map.get($theme-color,"bg-color");
+	// background-color:white;
 	color: #444141;
 	display: flex;
 	justify-content: space-between;
@@ -14,23 +17,17 @@
 		font-weight: bold;
 	}
 
-	&__actions {
-		display: flex;
-		gap: 20px;
-		align-items: center;
-
-		.admin-header__button {
-			background-color: rgb(197, 70, 70);
-			color: #fff;
-			padding: 8px 12px;
-			border: none;
-			border-radius: 5px;
-			cursor: pointer;
-			transition: background-color 0.3s ease;
-			font-size: 15px;
-			&:hover {
-				background-color: #666;
-			}
+	.admin-header-button{
+		background-color: map.get($theme-color,"main");
+		color: #fff;
+		padding: 8px 12px;
+		border: none;
+		border-radius: 5px;
+		cursor: pointer;
+		transition: background-color 0.3s ease;
+		font-size: 15px;
+		&:hover {
+			background-color: red;
 		}
 	}
 }

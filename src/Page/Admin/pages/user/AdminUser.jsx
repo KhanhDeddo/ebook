@@ -101,11 +101,6 @@ const AdminUser = () => {
 			property: 'user_address',
 			type: 'text'
 		},
-		{
-			name: 'Là admin',
-			property: 'user_is_admin',
-			type: 'checkbox'
-		},
 	];
 
 
@@ -144,12 +139,6 @@ const AdminUser = () => {
 
 	const hanldeConfirm = async () => {
 		console.log(rowSelected);
-		// if (rowSelected.user_is_admin === 'true') {
-		// 	rowSelected.user_is_admin = 1;
-		// }
-		// else {
-		// 	rowSelected.user_is_admin = 0;
-		// }
 		if (statePopup === STATE_ADD) {
 			var res = await addUser(rowSelected);
 		}else {

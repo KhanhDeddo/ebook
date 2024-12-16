@@ -91,12 +91,14 @@ const Header = () => {
       }
     }
   };
-
   useEffect(() => {
     loadListCart();
   // },);
 },[user]);
-
+  const total = listCartItem.reduce(
+    (sum, item) => sum + Number(item.price_at_purchase),
+    0
+  );
   // // Hàm callback để cập nhật giỏ hàng
   // const onCartUpdated = () => {
   //   loadListCart(); // Tải lại danh sách giỏ hàng
@@ -197,7 +199,7 @@ const Header = () => {
           <div className="col-xl-3">
             <div className="header-cart">
               <div className="header-cart-price">
-                <span>{Formatter(100000)}</span>
+                <span>{total}.000 đ</span>
               </div>
               <ul>
                 <li>

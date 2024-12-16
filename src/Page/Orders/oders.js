@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import "./orders.scss";
 import DataTable from "react-data-table-component";
-import { fetcOrders } from "../../Api/getListOrder";
 import { NavBar } from "../../Components/Navbar/navbar";
 import { updateOrder } from "../../Api/updateOrder";
+import { fetcOrderByUser } from "../../Api/getListOrdersByUser";
 
 const Orders = () => {
     const [user, setUser] = useState(null);
@@ -24,7 +24,7 @@ const Orders = () => {
         if (user) {
             const loadDataOrders = async () => {
                 try {
-                    const data = await fetcOrders(user.user_id);
+                    const data = await fetcOrderByUser(user.user_id);
                     setListOrder(data);
                 } catch (err) {
                     console.error(err);
@@ -114,32 +114,27 @@ const Orders = () => {
             name: "Địa chỉ nhận hàng",
             cell: (row) => (
                 <div>
-                    {/* <p>Tên: {row.recipient_name}</p>
-                    <p>SĐT: {row.recipient_phone}</p>
-                    <p>Email: {row.recipient_email}</p> */}
                     <p>{row.shipping_address}</p>
                 </div>
             ),
         },
         {
             id: 6,
-            name: "Lựa chọn",
-            // cell: (row) => (
-                // row.status === "Chờ xác nhận" ? 
-                //     <button className="cancel-order" onClick={() => handleCancel(row.order_id)}>Hủy</button> 
-                //     : row.status === "Đang giao" ? 
-                //         <button className="finish-order" disabled>Xác nhận</button>
-                //         :<button className="finish-order" disabled>Xác nhận</button>
-            // ),
+            name: "Thao tác",
             cell :row => {
                 if(row.status === "Chờ xác nhận"){
                     return <button className="cancel-order" onClick={() => handleCancel(row.order_id)}>Hủy</button> 
                 }else if(row.status === "Đã hủy"){
                     return <button className="re-order" onClick={() => handleReOrder(row.order_id)}>Đặt lại</button> 
+                }else if(row.status === "Đang giao" || row.status === "Hoàn thành" ){
+                    return <button 
+                                className="finish-order" 
+                                disabled={row.status === "Hoàn thành"} 
+                                onClick={() => handleFinish(row.order_id)}>
+                                Hoàn thành
+                            </button>
                 }else{
-                    return row.status === "Đang giao" ? 
-                            <button className="finish-order" onClick={() => handleFinish(row.order_id)}>Hoàn thành</button>
-                            :<button className="finish-order" disabled>Hoàn thành</button>
+                    return <button className="cancel-order-disabled" disabled>Hủy</button>
                 }
             }
         }
@@ -149,6 +144,7 @@ const Orders = () => {
     const menu = [
         { name: "Tất cả", status: "" },
         { name: "Chờ xác nhận", status: "Chờ xác nhận" },
+        { name: "Đã xác nhận", status: "Đã xác nhận" },
         { name: "Chờ vận chuyển", status: "Chờ vận chuyển" },
         { name: "Đang giao", status: "Đang giao" },
         { name: "Hoàn thành", status: "Hoàn thành" },
@@ -197,6 +193,7 @@ const Orders = () => {
                                 pagination
                                 paginationComponentOptions={paginationComponentOptions}
                                 defaultSortFieldId={2}
+                                defaultSortAsc={false} // Sắp xếp giảm dần
                             />
                         </div>
                     </div>

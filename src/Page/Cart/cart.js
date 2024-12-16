@@ -107,7 +107,7 @@ export const CartPage = () => {
     if (user) {
         const loadDataOrders = async () => {
             try {
-                const data = await fetcOrders(user.user_id);
+                const data = await fetcOrders();
                 setListOrder(data);
             } catch (err) {
                 console.error(err);
@@ -115,7 +115,7 @@ export const CartPage = () => {
         };
         loadDataOrders();
     }
-}, [user]);
+}, [user,payment]);
   const [order, setOrder] = useState({});
   useEffect(() => {
     if (user) {
@@ -245,10 +245,10 @@ export const CartPage = () => {
                           <button>+</button>
                         </div>
                         <div className="col-lg-15">
-                          <p>{item.price_at_purchase} VND</p>
+                          <p>{item.price_at_purchase}.000 VND</p>
                         </div>
-                        <div className={book.stock_quantity > 0 ? "col-lg-15 con-hang":"col-lg-15 het-hang"}>
-                          {book.stock_quantity > 0 ? <p>Còn hàng</p>:<p>Hết hàng</p>}
+                        <div className={book.status_book === "Đang bán" ? "col-lg-15 con-hang":"col-lg-15 het-hang"}>
+                          <p>{book.status_book}</p>
                         </div>
                         <div className="col-lg-15">
                           <p>{new Date(item.added_at).toLocaleString()}</p>

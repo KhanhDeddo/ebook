@@ -25,6 +25,7 @@ const BookDetails = ({ onCartUpdated }) => {
   const location = useLocation();
   const [payment,setPayment] = useState(false);
 
+
   // Lấy thông tin người dùng từ localStorage
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -51,7 +52,7 @@ const BookDetails = ({ onCartUpdated }) => {
       try {
         const data = await fetchBookDetails(id);
         setBook(data);
-        setIsOutOfStock(data.stock_quantity === 0);
+        setIsOutOfStock(data.status_book!=="Đang bán");
       } catch (err) {
         console.error("Error fetching book details:", err);
       }
@@ -110,7 +111,7 @@ const BookDetails = ({ onCartUpdated }) => {
       if (user) {
           const loadDataOrders = async () => {
               try {
-                  const data = await fetcOrders(user.user_id);
+                  const data = await fetcOrders();
                   setListOrder(data);
               } catch (err) {
                   console.error(err);
@@ -118,12 +119,13 @@ const BookDetails = ({ onCartUpdated }) => {
           };
           loadDataOrders();
       }
-  }, [user]);
+  }, [user,payment]);
 
   const handConfirm = async () => {
     try {
         // Gửi yêu cầu POST tới API để thêm CartItem
         await createOrder(order);
+        console.log(listOrder.length+1)
         alert("Đơn hàng được đặt thành công.")
        
           //(order_id,book_id,quantity,price_per_item,total_price)
@@ -155,7 +157,7 @@ const BookDetails = ({ onCartUpdated }) => {
   // Thêm hoặc cập nhật sách trong giỏ hàng
   const handleAddCartAction = async () => {
     if (isOutOfStock) {
-      alert("Sản phẩm đã hết hàng và không thể thêm vào giỏ hàng.");
+      alert("Sản phẩm đã ngưng bán và không thể thêm vào giỏ hàng.");
       return;
     }
     if (!user) {
@@ -167,7 +169,7 @@ const BookDetails = ({ onCartUpdated }) => {
       if (cartItem) {
         const updatedData = {
           quantity: cartItem.quantity + quantity,
-          price_at_purchase: cartItem.price_at_purchase + book.price * quantity,
+          price_at_purchase: Number(cartItem.price_at_purchase) + Number(book.price) * quantity,
         };
         await updateCartItem(user.user_id, id, updatedData);
         alert(`Đã cập nhật ${book.title} trong giỏ hàng!`);
@@ -176,7 +178,7 @@ const BookDetails = ({ onCartUpdated }) => {
           cart_id: user.user_id,
           book_id: book.id,
           quantity,
-          price_at_purchase: book.price * quantity,
+          price_at_purchase: Number(book.price) * quantity,
         };
         await createCartItem(newCartItem);
         if (onCartUpdated) {
@@ -194,7 +196,7 @@ const BookDetails = ({ onCartUpdated }) => {
   // Mua ngay
   const handleBuyAction = () => {
     if (isOutOfStock) {
-      alert("Sản phẩm đã hết hàng và không thể mua.");
+      alert("Sản phẩm đã ngưng bán và không thể mua.");
     } else if (!user) {
       alert("Bạn chưa đăng nhập, vui lòng đăng nhập!");
     } else {
@@ -245,10 +247,10 @@ const BookDetails = ({ onCartUpdated }) => {
               </p>
               <p>
                   Trạng thái:
-                  {book.stock_quantity > 0 ? (
-                    <span>Còn hàng</span>
+                  {book.status_book === "Đang bán" ? (
+                    <span>{book.status_book}</span>
                   ) : (
-                    <span className="het-hang">Hết hàng</span>
+                    <span className="het-hang">{book.status_book}</span>
                   )}
                 </p>
                 <p>Mô tả sách: {book.description}</p>

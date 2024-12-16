@@ -1,78 +1,107 @@
 import React, { useEffect, useState } from 'react';
 import './AdminProduct.scss';
 import DataTable from "react-data-table-component";
-import { addProduct, getProducts, updateProduct, updateStatusOrder } from '../../../../Api/apiAdmin';
+import { addProduct, getProducts, updateProduct} from '../../../../Api/apiAdmin';
+import { Space, Switch } from 'antd';
 
 const AdminProduct = () => {
     const [listData,setlistData] = useState([]);
-
-	const [search, setSearch] = useState('');
-
+	const [search] = useState('');
 	const [keyTable, setkeyTable] = useState(1);
-
 	const [rowSelected, setrowSelected] = useState({});
-
 	const [showPopup, setshowPopup] = useState(false);
-
+	const [statusBook,setStatusBook] = useState("");
 	const loadDataGrid = async(value) => {
 		const data = await getProducts({"search" : value});
 		setlistData(data)
 	};
 
 	const [statePopup, setstatePopup] = useState(1);
-
 	const STATE_ADD = 2;
 
-	var dataDetail = {};
-
-	const CONFIRM_STATUS = "Xác nhận";
+	// const CONFIRM_STATUS = "Xác nhận";
 
 	useEffect(()=>{
 		loadDataGrid(search);
     }, [])
 
+	const handleEdit = (row) => {
+		setrowSelected(row);  // Lưu thông tin hàng được chọn
+		setshowPopup(true);   // Hiển thị popup
+		setstatePopup(1);     // Đặt trạng thái thành "Sửa"
+	};
+	
 	const columns = [
 		{
-		  id: 1,
-		  name: "ID",
-		  selector: (row) => row.id,
-		  reorder: true
+			id: 1,
+			name: "ID",
+			selector: (row) => row.id,
+			reorder: true
 		},
 		{
-		  id: 2,
-		  name: "Tiêu đề",
-		  selector: (row) => row.title,
-		  reorder: true
+			id: 2,
+			name: "Tiêu đề",
+			selector: (row) => row.title,
+			reorder: true
 		},
 		{
 			id: 3,
-			name: "Tác giả",
-			selector: (row) => row.author,
-			right: true,
-			reorder: true
-		},
+			name: "Trạng thái",
+			selector: (row) => (
+			  <Space direction="vertical">
+				<Switch
+				  checkedChildren="Đang bán"
+				  unCheckedChildren="Ngưng bán"
+				  defaultChecked={row.status_book === "Đang bán"}
+				  className="custom-switch"
+				  onChange={(checked) => {
+					const newStatus = checked ? "Đang bán" : "Ngưng bán";
+					setStatusBook(newStatus); // Cập nhật trạng thái vào state
+					console.log(`Trạng thái mới của sách ID ${row.id}: ${newStatus}`);
+					// Gọi API để cập nhật trạng thái (nếu cần)
+				  }}
+				/>
+			  </Space>
+			),
+			center: true,
+			reorder: true,
+		},		  
 		{
 			id: 4,
 			name: "Giá tiền",
 			selector: (row) => row.price,
-			right: true,
 			reorder: true
 		},
 		{
 			id: 5,
-			name: "Loại danh mục",
+			name: "Thể loại",
 			selector: (row) => row.category,
-			right: true,
 			reorder: true
 		},
 		{
 			id: 6,
-			name: "Số lượng trong kho",
+			name: "Số lượng sách",
 			selector: (row) => row.stock_quantity,
-			right: true,
+			center:true,
+			reorder: true
+		},
+		{
+			id: 7,
+			name: "Thao tác",
+			cell: (row) => (
+				<div className="btn-update">
+					<button 
+						onClick={() => handleEdit(row)}
+					>
+						Cập nhật
+					</button>
+				</div>
+			),
+			center:true,
 			reorder: true
 		},
 	];
+	
 
 
 	const list_detail = [
@@ -103,7 +132,7 @@ const AdminProduct = () => {
 			type: 'text'
 		},
 		{
-			name: 'Danh mục',
+			name: 'Thể loại',
 			property: 'category',
 			type: 'text'
 		},
@@ -118,7 +147,7 @@ const AdminProduct = () => {
 			type: 'text'
 		},
 		{
-			name: 'Số sách trong kho',
+			name: 'Số lượng sách',
 			property: 'stock_quantity',
 			type: 'number'
 		},
@@ -143,7 +172,6 @@ const AdminProduct = () => {
 	const handleSelected = async (row) => {
 		console.log(row);
 		setrowSelected(row);
-		dataDetail = row;
 		setshowPopup(true);
 		setstatePopup(1);
 	}
@@ -158,21 +186,11 @@ const AdminProduct = () => {
 		setkeyTable(keyTable + 1);
 	}
 
-	const formatDate = (dateString) => {
-		if (!dateString) return '';
-		const date = new Date(dateString);
-		const day = date.getDate().toString().padStart(2, '0');
-		const month = (date.getMonth() + 1).toString().padStart(2, '0');
-		const year = date.getFullYear();
-	  
-		return `${day}/${month}/${year}`;
-	}
-
 	const hanldeConfirm = async () => {
 		if (statePopup === STATE_ADD) {
 			var res = await addProduct(rowSelected);
 		}else {
-			var res = await updateProduct(rowSelected);
+			await updateProduct(rowSelected);
 		}
 		if (res) {
 			setshowPopup(false);
@@ -192,13 +210,36 @@ const AdminProduct = () => {
 	const handleChange = (event, property) => {
 		setrowSelected({ ...rowSelected, [property]: event.target.value });
 	  };
-
+	const menu = [
+		{name:"Tất cả",index:"0"},
+		{name:"Đang bán",index:"1"},
+		{name:"Ngưng bán",index:"2"},
+		{name:"Thể loại",index:"3"},
+		{name:"Tác giả",index:"4"},
+	]
 	return (
 		<div className=''>
 			<div className="home-title">Sản phẩm</div>
-			<div className='header-page'>
-				<button onClick={handleAdd}>Thêm mới</button>
+			<div className='input-btn-products'>
 				<input placeholder='Tìm kiếm' className='input input-search' onChange={handleSearch} />
+				<button onClick={handleAdd}>Thêm mới</button>
+			</div>
+			<div className='ad-prd-navbar'>
+				{menu.map((item, key_item) => (
+					item.name === "Thể loại" || item.name === "Tác giả" ? (
+						<select
+							// value={}
+							// onChange={(e) => setLevelSchoolFilter(e.target.value)} // Cập nhật bộ lọc cấp học
+						>
+							<option value="">Tất cả</option>
+							<option value="Tiểu học">Tiểu học</option>
+							<option value="Trung học cơ sở">Trung học cơ sở</option>
+							<option value="Trung học phổ thông">Trung học phổ thông</option>
+						</select>
+					) : (
+						<button key={key_item}>{item.name}</button>
+					)
+				))}
 			</div>
 
 			<DataTable
@@ -229,7 +270,7 @@ const AdminProduct = () => {
 
 					</div>
 					<div className='footer-popup'>
-						<button className='button' onClick={hanldeConfirm}>Lưu</button>
+						<button onClick={hanldeConfirm}>Lưu</button>
 					</div>
 				</div>
 			</div>

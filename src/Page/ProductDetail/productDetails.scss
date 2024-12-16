@@ -54,6 +54,8 @@
           border: none;
           color:white;
           background-color: map.get($theme-color,"main");
+          border: 1px solid;
+          border-radius: 5px;
         }
         input{
           width: 60px;
@@ -71,8 +73,9 @@
         width: 130px;
         font-size: 17px;
         border-color: #ebebeb;
-        height: 40px;
-        border-radius: 2%;
+        height: 45px;
+        border: 1px solid;
+        border-radius: 5px;
       }
       .buy-now{
         width: 100px;

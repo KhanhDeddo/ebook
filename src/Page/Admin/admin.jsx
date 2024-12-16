@@ -54,8 +54,7 @@ export const AdminHome = () => {
 					<p className="stats-value">{dashboard?.order}</p>
 				</div>
 				<div className="stats-card">
-					<h3>Tổng số sản phẩm</h3>
-					{/* <p className="stats-value">{dashboard?.item}</p> */}
+					<h3>Tổng doanh thu hôm nay </h3>
 					<p className="stats-value">{dashboard?.book}</p>
 				</div>
 				<div className="stats-card">
@@ -63,7 +62,7 @@ export const AdminHome = () => {
 					<p className="stats-value">{dashboard?.user}</p>
 				</div>
 				<div className="stats-card">
-					<h3>Tổng loại sản phẩm</h3>
+					<h3>Tổng số sản phẩm</h3>
 					<p className="stats-value">{dashboard?.book}</p>
 				</div>
 			</div>

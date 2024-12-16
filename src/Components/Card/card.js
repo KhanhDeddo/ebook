@@ -24,7 +24,7 @@ export const CardBook = ({ id, title, image, price,width=210,height=400,sizef=20
       <div className="title" style={{fontSize:sizef}}>
         <Meta title={title}/>
         <span>Giá: 
-          <span className="card-price"> {price}VND</span>
+          <span className="card-price"> {price}.000 VND</span>
         </span>
       </div>
     </Card>

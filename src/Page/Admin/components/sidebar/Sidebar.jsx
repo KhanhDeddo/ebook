@@ -5,6 +5,7 @@ import { IoCart } from 'react-icons/io5';
 import { IoBagCheck } from 'react-icons/io5';
 import { FaUser } from 'react-icons/fa';
 import {NavLink, useLocation } from 'react-router-dom';
+import { AiOutlineBarChart } from 'react-icons/ai';
 
 const Sidebar = () => {
 	const { pathname } = useLocation();
@@ -19,36 +20,24 @@ const Sidebar = () => {
 		},
 		{
 			id: 2,
+			title: 'Thống kê',
+			icon: <AiOutlineBarChart />,
+			link: '/admin/statistics',
+		},
+		{
+			id: 3,
 			title: 'Đơn hàng',
 			icon: <IoCart />,
 			link: '/admin/order',
 		},
-		// {
-		// 	id: 3,
-		// 	title: 'Ví',
-		// 	icon: <IoIosWallet />,
-		// 	link: '/admin/wallet',
-		// },
 		{
 			id: 4,
 			title: 'Sản phẩm',
 			icon: <IoBagCheck />,
 			link: '/admin/product',
 		},
-		// {
-		// 	id: 5,
-		// 	title: 'Thêm sản phẩm',
-		// 	icon: <MdLibraryAdd />,
-		// 	link: '/admin/add-product',
-		// },
-		// {
-		// 	id: 6,
-		// 	title: 'Hồ sơ của tôi',
-		// 	icon: <FaUser />,
-		// 	link: '/admin/profile',
-		// },
 		{
-			id: 7,
+			id: 55,
 			title: 'Quản lý người dùng',
 			icon: <FaUser />,
 			link: '/admin/user',
