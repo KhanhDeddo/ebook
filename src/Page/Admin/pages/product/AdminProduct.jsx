@@ -3,6 +3,7 @@ import './AdminProduct.scss';
 import DataTable from "react-data-table-component";
 import { addProduct, getProducts, updateProduct} from '../../../../Api/apiAdmin';
 import { Space, Switch } from 'antd';
+import { updateBook } from '../../../../Api/updateBook';
 
 const AdminProduct = () => {
     const [listData,setlistData] = useState([]);
@@ -10,7 +11,6 @@ const AdminProduct = () => {
 	const [keyTable, setkeyTable] = useState(1);
 	const [rowSelected, setrowSelected] = useState({});
 	const [showPopup, setshowPopup] = useState(false);
-	const [statusBook,setStatusBook] = useState("");
 	const loadDataGrid = async(value) => {
 		const data = await getProducts({"search" : value});
 		setlistData(data)
@@ -20,7 +20,12 @@ const AdminProduct = () => {
 	const STATE_ADD = 2;
 
 	// const CONFIRM_STATUS = "Xác nhận";
-
+	const updateStatus = async(id,status) =>{
+		try{
+			const data = {status_book : status}
+			await updateBook(id,data)
+		}catch(error){}
+	}
 	useEffect(()=>{
 		loadDataGrid(search);
     }, [])
@@ -56,7 +61,7 @@ const AdminProduct = () => {
 				  className="custom-switch"
 				  onChange={(checked) => {
 					const newStatus = checked ? "Đang bán" : "Ngưng bán";
-					setStatusBook(newStatus); // Cập nhật trạng thái vào state
+					updateStatus(row.id,newStatus)
 					console.log(`Trạng thái mới của sách ID ${row.id}: ${newStatus}`);
 					// Gọi API để cập nhật trạng thái (nếu cần)
 				  }}
