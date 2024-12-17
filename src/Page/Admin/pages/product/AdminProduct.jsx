@@ -7,19 +7,49 @@ import { updateBook } from '../../../../Api/updateBook';
 
 const AdminProduct = () => {
     const [listData,setlistData] = useState([]);
+    const [listSearchProduct,setListSearchProduct] = useState([]);
 	const [search] = useState('');
 	const [keyTable, setkeyTable] = useState(1);
 	const [rowSelected, setrowSelected] = useState({});
 	const [showPopup, setshowPopup] = useState(false);
+	const [currentFilter, setCurrentFilter] = useState(""); // Bộ lọc hiện tại
+	const [activeButton, setActiveButton] = useState(0); // Index của nút active
 	const loadDataGrid = async(value) => {
-		const data = await getProducts({"search" : value});
-		setlistData(data)
+		try {
+			const data = await getProducts({ search: value });
+			const safeData = Array.isArray(data) ? data : [];
+			
+			// Sắp xếp danh sách theo ngày mới nhất
+			const sortedData = safeData.sort(
+				(a, b) => new Date(b.created_at) - new Date(a.created_at)
+			);
+			
+			setlistData(sortedData);
+	
+			// Áp dụng bộ lọc hiện tại
+			setListSearchProduct(
+				currentFilter === "" 
+					? sortedData 
+					: sortedData.filter((order) => order.status === currentFilter)
+			);
+		} catch (err) {
+			console.error("Lỗi khi tải dữ liệu:", err);
+			setlistData([]);
+			setListSearchProduct([]);
+		}
 	};
-
+	// Hàm thay đổi bộ lọc
+	const handleChangeFilter = (status,index) => {
+		setCurrentFilter(status); // Cập nhật trạng thái bộ lọc
+		setActiveButton(index);  // Cập nhật nút đang active
+		setListSearchProduct(
+			status === "" ? listData : listData.filter((order) => order.status === status)
+		);
+	};
+	
 	const [statePopup, setstatePopup] = useState(1);
 	const STATE_ADD = 2;
 
-	// const CONFIRM_STATUS = "Xác nhận";
 	const updateStatus = async(id,status) =>{
 		try{
 			const data = {status_book : status}
@@ -63,7 +93,6 @@ const AdminProduct = () => {
 					const newStatus = checked ? "Đang bán" : "Ngưng bán";
 					updateStatus(row.id,newStatus)
 					console.log(`Trạng thái mới của sách ID ${row.id}: ${newStatus}`);
-					// Gọi API để cập nhật trạng thái (nếu cần)
 				  }}
 				/>
 			  </Space>
@@ -71,27 +100,33 @@ const AdminProduct = () => {
 			center: true,
 			reorder: true,
 		},		  
+		// {
+		// 	id: 4,
+		// 	name: "Ngày tạo",
+		// 	selector: (row) => new Date(row.created_at).toLocaleString(),
+		// 	reorder: true
+		// },
 		{
-			id: 4,
+			id: 5,
 			name: "Giá tiền",
 			selector: (row) => row.price,
 			reorder: true
 		},
 		{
-			id: 5,
+			id: 6,
 			name: "Thể loại",
 			selector: (row) => row.category,
 			reorder: true
 		},
 		{
-			id: 6,
+			id: 7,
 			name: "Số lượng sách",
 			selector: (row) => row.stock_quantity,
 			center:true,
 			reorder: true
 		},
 		{
-			id: 7,
+			id: 8,
 			name: "Thao tác",
 			cell: (row) => (
 				<div className="btn-update">
@@ -122,7 +157,7 @@ const AdminProduct = () => {
 
 		},
 		{
-			name: 'Chi tiết',
+			name: 'Mô tả',
 			property: 'description',
 			type: 'text'
 		},
@@ -195,7 +230,7 @@ const AdminProduct = () => {
 		if (statePopup === STATE_ADD) {
 			var res = await addProduct(rowSelected);
 		}else {
-			await updateProduct(rowSelected);
+			res = await updateProduct(rowSelected);
 		}
 		if (res) {
 			setshowPopup(false);
@@ -242,7 +277,13 @@ const AdminProduct = () => {
 							<option value="Trung học phổ thông">Trung học phổ thông</option>
 						</select>
 					) : (
-						<button key={key_item}>{item.name}</button>
+						<button 
+							key={key_item} 
+							className={key_item === activeButton ? "active":""} 
+							onClick={() => handleChangeFilter(item.status_book,key_item)}
+						>
+							{item.name}
+						</button>
 					)
 				))}
 			</div>
@@ -250,8 +291,9 @@ const AdminProduct = () => {
 			<DataTable
 				key={keyTable}
 				columns={columns}
-				data={listData}
+				data={listSearchProduct}
 				defaultSortFieldId={1}
+				defaultSortAsc = {false}
 				pagination
 				paginationComponentOptions={paginationComponentOptions}
 				onRowDoubleClicked={handleSelected}

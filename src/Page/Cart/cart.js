@@ -7,6 +7,7 @@ import { NavBar } from "../../Components/Navbar/navbar";
 import { createOrder } from "../../Api/createOrder";
 import { createOrderItem } from "../../Api/createOrderItem";
 import { fetcOrders } from "../../Api/getListOrder";
+import { updateCartItem } from "../../Api/updateCartItem";
 
 export const CartPage = () => {
   const location = useLocation();
@@ -17,6 +18,7 @@ export const CartPage = () => {
   const [selectedBookIds, setSelectedBookIds] = useState([]); // State cho các book_id được chọn
   const [listBook, setListBook] = useState([]); // State cho các book_id được chọn
   const [payment,setPayment] = useState(false);
+  const [changeQuantityCartItem,setChangeQuantityCartItem] = useState(false);
   const [listOrder,setListOrder] = useState([]);
  
   // Tính tổng tiền
@@ -57,7 +59,7 @@ export const CartPage = () => {
       };
       loadListCart();
     }
-  }, [user]);
+  }, [user,changeQuantityCartItem]);
 
   const deleteCartItem = async (cart_id, book_id) => {
     const apiUrl = `http://127.0.0.1:5000/api/cartitems/${cart_id}/${book_id}`;
@@ -89,7 +91,11 @@ export const CartPage = () => {
   const handleSelectAll = () => {
     setSelectAll(!selectAll);
     if (!selectAll) {
-      setSelectedBookIds(listCartItem.map((item) => item));
+      setSelectedBookIds(
+        listCartItem
+        .filter((item) => findBookById(item.book_id).status_book === "Đang bán") // Lọc các item có sách "Đang bán"
+        .map((item) => item) // Lấy ra book_id của các sách đó
+      );
     } else {
       setSelectedBookIds([]);
     }
@@ -177,6 +183,20 @@ export const CartPage = () => {
     handConfirm();
     console.log('Form Data:',order);
   };
+
+  const updateQuantityCartItems = async (id_cartItem,newQuantity,new_price_at_purchase) => {
+      try{
+          const data = {quantity:newQuantity,price_at_purchase:new_price_at_purchase}
+          await updateCartItem(user.user_id,id_cartItem,data)
+          setChangeQuantityCartItem(!changeQuantityCartItem)
+      }catch(err){}
+  };
+  const addQuantity = (id_cartItem,quantityCartItem,book_price) =>{
+      updateQuantityCartItems(id_cartItem,quantityCartItem + 1,(quantityCartItem + 1)*book_price)
+  }
+  const subQuantity = (id_cartItem,quantityCartItem,book_price) =>{
+    updateQuantityCartItems(id_cartItem,quantityCartItem-1,(quantityCartItem - 1)*book_price)
+  }
   return (
     <div className="container">
       <NavBar name ="Giỏ hàng"/>
@@ -237,12 +257,22 @@ export const CartPage = () => {
                           <p>{book.title}</p>
                         </div>
                         <div className="col-lg-15">
-                          <p>{book.price} VND</p>
+                          <p>{book.price}.000 VND</p>
                         </div>
                         <div className="col-lg-15 control-quantity">
-                          <button>-</button>
+                          <button 
+                            disabled = {item.quantity <= 1} 
+                            onClick={() => subQuantity(item.book_id,item.quantity,book.price)}
+                          >
+                              -
+                          </button>
                           <p>{item.quantity}</p>
-                          <button>+</button>
+                          <button 
+                            disabled = {item.quantity >= book.stock_quantity}
+                            onClick={() => addQuantity(item.book_id,item.quantity,book.price)}
+                          >
+                            +
+                          </button>
                         </div>
                         <div className="col-lg-15">
                           <p>{item.price_at_purchase}.000 VND</p>
@@ -259,7 +289,7 @@ export const CartPage = () => {
                           >
                             Xóa
                           </button>
-                          {book.stock_quantity>0?
+                          {book.stock_quantity>0 && book.status_book === "Đang bán"?
                             <input
                             type="checkbox"
                             checked={selectedBookIds.includes(item)}
