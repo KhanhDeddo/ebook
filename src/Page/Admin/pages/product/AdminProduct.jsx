@@ -14,37 +14,40 @@ const AdminProduct = () => {
 	const [showPopup, setshowPopup] = useState(false);
 	const [currentFilter, setCurrentFilter] = useState(""); // Bộ lọc hiện tại
 	const [activeButton, setActiveButton] = useState(0); // Index của nút active
-	const loadDataGrid = async(value) => {
+	const loadDataGrid = async (value) => {
 		try {
 			const data = await getProducts({ search: value });
 			const safeData = Array.isArray(data) ? data : [];
-			
+	
 			// Sắp xếp danh sách theo ngày mới nhất
 			const sortedData = safeData.sort(
 				(a, b) => new Date(b.created_at) - new Date(a.created_at)
 			);
-			
-			setlistData(sortedData);
+	
+			setlistData(sortedData); // Cập nhật danh sách gốc
 	
 			// Áp dụng bộ lọc hiện tại
-			setListSearchProduct(
-				currentFilter === "" 
-					? sortedData 
-					: sortedData.filter((order) => order.status === currentFilter)
-			);
+			const filteredData = currentFilter === ""
+				? sortedData
+				: sortedData.filter((item) => item.status_book === currentFilter);
+	
+			setListSearchProduct(filteredData);
 		} catch (err) {
 			console.error("Lỗi khi tải dữ liệu:", err);
 			setlistData([]);
 			setListSearchProduct([]);
 		}
 	};
-	// Hàm thay đổi bộ lọc
-	const handleChangeFilter = (status,index) => {
-		setCurrentFilter(status); // Cập nhật trạng thái bộ lọc
-		setActiveButton(index);  // Cập nhật nút đang active
-		setListSearchProduct(
-			status === "" ? listData : listData.filter((order) => order.status === status)
-		);
+	
+	const handleChangeFilter = (status, index) => {
+		setCurrentFilter(status); // Cập nhật bộ lọc hiện tại
+		setActiveButton(index);  // Đánh dấu nút đang active
+		// Áp dụng bộ lọc ngay sau khi thay đổi
+		const filteredData = status === ""
+			? listData
+			: listData.filter((item) => item.status_book === status);
+	
+		setListSearchProduct(filteredData); // Cập nhật danh sách hiển thị
 	};
 	
 	const [statePopup, setstatePopup] = useState(1);
@@ -216,15 +219,40 @@ const AdminProduct = () => {
 		setstatePopup(1);
 	}
 
-	const handleSearch = async (e) => {
-		console.log(e.target?.value)
-		if(e.target.value) {
-			await loadDataGrid(e.target.value);
-		}else {
-			await loadDataGrid('');
-		}
-		setkeyTable(keyTable + 1);
-	}
+	// const handleSearch = async (e) => {
+	// 	console.log(e.target?.value)
+	// 	if(e.target.value) {
+	// 		await loadDataGrid(e.target.value);
+	// 	}else {
+	// 		await loadDataGrid('');
+	// 	}
+	// 	setkeyTable(keyTable + 1);
+	// }
+	const handleSearch = (e) => {
+        const keyword = e.target.value.trim().toLowerCase().replace(/\s+/g, " "); // Chuyển từ khóa tìm kiếm về chữ thường
+        if (!keyword) {
+            // Nếu không nhập gì, hiển thị toàn bộ dữ liệu
+            setListSearchProduct(
+                currentFilter === "" 
+                    ? listData 
+                    : listData.filter((book) => book.status_book === currentFilter)
+            );
+        } else {
+            // Tìm kiếm dựa trên các trường cụ thể (mã đơn hàng, người tạo)
+            const filteredData = listData.filter(
+                (book) =>
+                    String(book.id).toLowerCase().includes(keyword) || // Tìm theo mã đơn hàng
+                    book.title.toLowerCase().includes(keyword)   // Tìm theo người tạo
+            );
+    
+            // Áp dụng bộ lọc nếu có
+            setListSearchProduct(
+                currentFilter === "" 
+                    ? filteredData 
+                    : filteredData.filter((book) => book.status_book === currentFilter)
+            );
+        }
+    };
 
 	const hanldeConfirm = async () => {
 		if (statePopup === STATE_ADD) {
@@ -251,11 +279,11 @@ const AdminProduct = () => {
 		setrowSelected({ ...rowSelected, [property]: event.target.value });
 	  };
 	const menu = [
-		{name:"Tất cả",index:"0"},
-		{name:"Đang bán",index:"1"},
-		{name:"Ngưng bán",index:"2"},
-		{name:"Thể loại",index:"3"},
-		{name:"Tác giả",index:"4"},
+		{name:"Tất cả",status:""},
+		{name:"Đang bán",status:"Đang bán"},
+		{name:"Ngưng bán",status:"Ngưng bán"},
+		// {name:"Thể loại",status:"Đang bán"},
+		// {name:"Tác giả",status:"Đang bán"},
 	]
 	return (
 		<div className=''>
@@ -280,7 +308,7 @@ const AdminProduct = () => {
 						<button 
 							key={key_item} 
 							className={key_item === activeButton ? "active":""} 
-							onClick={() => handleChangeFilter(item.status_book,key_item)}
+							onClick={() => handleChangeFilter(item.status,key_item)}
 						>
 							{item.name}
 						</button>
