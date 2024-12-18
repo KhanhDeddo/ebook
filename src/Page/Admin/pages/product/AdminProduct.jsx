@@ -148,64 +148,23 @@ const AdminProduct = () => {
 
 
 	const list_detail = [
+		{ name: "Tiêu đề", property: "title", type: "text" },
+		{ name: "Tác giả", property: "author", type: "text" },
+		{ name: "Mô tả", property: "description", type: "text" },
+		{ name: "Giá tiền", property: "price", type: "number" },
+		{ name: "Link ảnh", property: "image_url", type: "text" },
+		{ name: "Thể loại", property: "category", type: "text" },
+		{ name: "Lớp", property: "level_class", type: "text" },
+		{ name: "Level trường", property: "level_school", type: "text" },
+		{ name: "Số lượng sách", property: "stock_quantity", type: "number" },
+		{ name: "Người phát hành", property: "publisher", type: "text" },
 		{
-			name: 'Tiêu đề',
-			property: 'title',
-			type: 'text'
+		  name: "Ngày phát hành",
+		  property: "created_at",
+		  type: "date",
+		  readOnly: true, // Chỉ hiển thị
 		},
-		{
-			name: 'Tác giả',
-			property: 'author',
-			type: 'text'
-
-		},
-		{
-			name: 'Mô tả',
-			property: 'description',
-			type: 'text'
-		},
-		{
-			name: 'Giá tiền',
-			property: 'price',
-			type: 'number'
-		},
-		{
-			name: 'Link ảnh',
-			property: 'image_url',
-			type: 'text'
-		},
-		{
-			name: 'Thể loại',
-			property: 'category',
-			type: 'text'
-		},
-		{
-			name: 'Lớp',
-			property: 'level_class',
-			type: 'text'
-		},
-		{
-			name: 'Level trường',
-			property: 'level_school',
-			type: 'text'
-		},
-		{
-			name: 'Số lượng sách',
-			property: 'stock_quantity',
-			type: 'number'
-		},
-		{
-			name: 'Người phát hành',
-			property: 'publisher',
-			type: 'text'
-		},
-		{
-			name: 'Ngày phát hành',
-			property: 'publication_date',
-			type: 'date'
-		},
-	];
-
+	  ];	  
 
 	const paginationComponentOptions = {
 		selectAllRowsItem: true,
@@ -334,15 +293,27 @@ const AdminProduct = () => {
 						<div onClick={() => setshowPopup(false)}>X</div>
 					</div>
 					<div className='body-popup'>
-						{list_detail.map((item, key) => {
-							return(<div className='item flex-center' key={key}> 
-								<span className='title'>{item.name}:</span>
-								<input type={item.type} className='value' value={rowSelected[item.property]}
+					{list_detail.map((item, key) => {
+						return (
+						<div className='item flex-center' key={key}>
+							<span className='title'>{item.name}:</span>
+							{item.readOnly ? (
+							<span className='value'>
+								{item.type === "date"
+								? new Date(rowSelected[item.property]).toLocaleString()
+								: rowSelected[item.property] || ""}
+							</span>
+							) : (
+							<input
+								type={item.type}
+								className='value'
+								value={rowSelected[item.property] || ""}
 								onChange={(e) => handleChange(e, item.property)}
-								/>
-							</div>)
-						})}
-
+							/>
+							)}
+						</div>
+						);
+					})}
 					</div>
 					<div className='footer-popup'>
 						<button onClick={hanldeConfirm}>Lưu</button>
