@@ -149,6 +149,7 @@ const AdminProduct = () => {
 
 	const list_detail = [
 		{ name: "Tiêu đề", property: "title", type: "text" },
+		// { name: "Trạng thái", property: "status_book", type: "text",readOnly:true, },
 		{ name: "Tác giả", property: "author", type: "text" },
 		{ name: "Mô tả", property: "description", type: "text" },
 		{ name: "Giá tiền", property: "price", type: "number" },

@@ -3,6 +3,8 @@ import "./AdminOrder.scss";
 import DataTable from "react-data-table-component";
 import { getOrderDetail, getOrders } from "../../../../Api/apiAdmin";
 import { updateOrder } from "../../../../Api/updateOrder";
+import { updateBook } from "../../../../Api/updateBook";
+import { fetchBooks } from "../../../../Api/getListBook";
 
 const AdminOrder = () => {
     const [listData, setListData] = useState([]); // Dữ liệu chính
@@ -13,6 +15,7 @@ const AdminOrder = () => {
     const [orderDetail, setOrderDetail] = useState([]); // Chi tiết đơn hàng
     const [currentFilter, setCurrentFilter] = useState(""); // Bộ lọc hiện tại
     const [activeButton, setActiveButton] = useState(0); // Index của nút active
+    const [bookUpdate,setBookUpdate] = useState({})
 
     const CONFIRM_STATUS = ["Chờ xác nhận", "Đã xác nhận", "Chờ vận chuyển", "Đang giao", "Hoàn thành"];
 
@@ -63,7 +66,18 @@ const AdminOrder = () => {
         if (currentIndex < CONFIRM_STATUS.length - 1) {
             const updatedRow = { ...row, status: CONFIRM_STATUS[currentIndex + 1] };
             try {
-                await updateOrder(updatedRow.order_id, { status: updatedRow.status });
+                // if(updatedRow.status === "Đã xác nhận"){
+                //     const listBook = await fetchBooks()
+                //     orderDetail.map((item,key)=>{
+                //         setBookUpdate(
+                //             listBook.filter((book)=> book.id === item.book_id)
+                //         );
+                //         console.log(bookUpdate)
+                //     })
+                // }
+                updatedRow.status === "Hoàn thành" ?
+                    await updateOrder(updatedRow.order_id, { status: updatedRow.status,payment_status:"Đã thanh toán" })
+                    :await updateOrder(updatedRow.order_id, { status: updatedRow.status });
                 await loadDataGrid(); // Reload dữ liệu sau khi cập nhật
             } catch (err) {
                 console.error("Lỗi khi cập nhật trạng thái:", err);

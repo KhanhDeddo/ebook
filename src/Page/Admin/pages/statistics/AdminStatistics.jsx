@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './AdminStatistics.scss';
 import { Bar } from "react-chartjs-2";
 import {
@@ -10,50 +10,130 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import { fetchBooks } from '../../../../Api/getListBook';
+import { fetcOrders } from '../../../../Api/getListOrder';
+import { fetchUsers } from '../../../../Api/getListUser';
 
 // Đăng ký các thành phần cho Chart.js
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const AdminStatistics = () => {
   const [view, setView] = useState("all"); // Trạng thái lọc dữ liệu ("all", "month", "day")
+  const [listBook, setListBook] = useState([]);
+  const [listOrder, setListOrder] = useState([]);
+  const [listUser, setListUser] = useState([]);
+  const [listOrderFinish, setListOrderFinish] = useState([]);
+  const [listBookDangBan, setListBookDangBan] = useState([]);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // Năm được chọn
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1); // Tháng được chọn
+  const [dataYear, setDataYear] = useState([]);
+  const [dataMonth, setDataMonth] = useState([]);
+  const [dataDay, setDataDay] = useState([]);
 
-  // Dữ liệu doanh thu mẫu (theo từng tháng)
-  const yearData = [
-    { month: "1", revenue: 120 },
-    { month: "2", revenue: 150 },
-    { month: "3", revenue: 180 },
-    { month: "4", revenue: 200 },
-    { month: "5", revenue: 220 },
-    { month: "6", revenue: 250 },
-    { month: "7", revenue: 300 },
-    { month: "8", revenue: 350 },
-    { month: "9", revenue: 280 },
-    { month: "10", revenue: 320 },
-    { month: "11", revenue: 360 },
-    { month: "12", revenue: 400 },
-  ];
+  // Load dữ liệu sách và đơn hàng
+  useEffect(() => {
+    const loadData = async () => {
+      const dataBook = await fetchBooks();
+      const dataOrder = await fetcOrders();
+      const dataUser = await fetchUsers();
+      setListBook(dataBook);
+      setListOrder(dataOrder);
+      setListUser(dataUser)
+    };
+    loadData();
+  }, []);
 
-  // Dữ liệu chi tiết trong một tháng (30 ngày)
-  const monthData = Array.from({ length: 30 }, (_, i) => ({
-    day: i + 1,
-    revenue: Math.floor(Math.random() * 50) + 10, // Doanh thu ngẫu nhiên từ 10 đến 60
-  }));
+  // Lọc đơn hàng "Hoàn thành"
+  useEffect(() => {
+    setListOrderFinish(
+      listOrder.filter((order) => order.status === "Hoàn thành")
+    );
+    setListBookDangBan(
+      listBook.filter((book) => book.status_book === "Đang bán")
+    )
+  }, [listBook,listOrder]);
 
-  // Dữ liệu chi tiết trong một ngày (24 giờ)
-  const dayData = Array.from({ length: 24 }, (_, i) => ({
-    hour: `${i}`,
-    revenue: Math.floor(Math.random() * 10) + 1, // Doanh thu ngẫu nhiên từ 1 đến 10
-  }));
+  // Lọc dữ liệu theo năm
+  useEffect(() => {
+    const filterOrdersByYear = () => {
+      const filteredOrders = listOrderFinish.filter((order) => {
+        const orderDate = new Date(order.order_date); // Chuyển đổi order_date thành kiểu Date
+        return orderDate.getFullYear() === parseInt(selectedYear); // So khớp năm
+      });
+      setDataYear(filteredOrders);
+    };
+    filterOrdersByYear();
+  }, [listOrderFinish, selectedYear]);
 
-  // Dữ liệu biểu đồ dựa trên trạng thái lọc
-  const data =
+  // Lọc dữ liệu theo tháng
+  useEffect(() => {
+    const filterOrdersByMonth = () => {
+      const filteredOrders = dataYear.filter((order) => {
+        const orderDate = new Date(order.order_date);
+        return orderDate.getMonth() + 1 === parseInt(selectedMonth); // So khớp tháng
+      });
+      setDataMonth(filteredOrders);
+    };
+    filterOrdersByMonth();
+  }, [dataYear, selectedMonth]);
+
+  // Lọc dữ liệu theo ngày
+  useEffect(() => {
+    const filterOrdersByDay = () => {
+      const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate(); // Số ngày trong tháng
+      const dailyData = Array.from({ length: daysInMonth }, (_, index) => {
+        const day = index + 1; // Ngày 1-31
+        const dailyOrders = dataMonth.filter((order) => {
+          const orderDate = new Date(order.order_date);
+          return orderDate.getDate() === day; // So khớp ngày
+        });
+        return {
+          day: day,
+          revenue: dailyOrders.reduce((sum, order) => sum + order.total_price, 0), // Tổng doanh thu
+        };
+      });
+      setDataDay(dailyData);
+    };
+    filterOrdersByDay();
+  }, [dataMonth]);
+
+  const [dataQuarter, setDataQuarter] = useState([]);
+  useEffect(() => {
+    const calculateQuarterData = () => {
+      const quarterlyData = [0, 0, 0, 0]; // Q1, Q2, Q3, Q4
+      dataYear.forEach((order) => {
+        const orderDate = new Date(order.order_date);
+        const month = orderDate.getMonth() + 1;
+        const revenue = order.total_price; // Chuyển sang nghìn VND
+
+        if (month >= 1 && month <= 3) quarterlyData[0] += revenue; // Q1
+        else if (month >= 4 && month <= 6) quarterlyData[1] += revenue; // Q2
+        else if (month >= 7 && month <= 9) quarterlyData[2] += revenue; // Q3
+        else if (month >= 10 && month <= 12) quarterlyData[3] += revenue; // Q4
+      });
+      setDataQuarter(quarterlyData);
+    };
+    calculateQuarterData();
+  }, [dataYear]);
+  // Dữ liệu biểu đồ
+  const chartData =
     view === "all"
       ? {
-          labels: yearData.map((item) => `Tháng ${item.month}`), // Trục X là các tháng
+          labels: Array.from({ length: 12 }, (_, i) => `${i + 1}`), // Trục X là các tháng
           datasets: [
             {
-              label: "Doanh thu (triệu VND)",
-              data: yearData.map((item) => item.revenue), // Dữ liệu doanh thu theo tháng
+              label: "Doanh thu (Nghìn VND)",
+              data: Array.from({ length: 12 }, (_, i) => {
+                const month = i + 1;
+                const monthlyOrders = dataYear.filter((order) => {
+                  const orderDate = new Date(order.order_date);
+                  return orderDate.getMonth() + 1 === month;
+                });
+                return monthlyOrders.reduce(
+                  (sum, order) => sum + order.total_price,
+                  0
+                ); // Đổi sang nghìn VND
+              }),
               backgroundColor: "rgba(4, 0, 255, 0.6)",
               borderColor: "rgba(4, 0, 255, 0.6)",
               borderWidth: 1,
@@ -62,29 +142,31 @@ const AdminStatistics = () => {
         }
       : view === "month"
       ? {
-          labels: monthData.map((item) => `${item.day}`), // Trục X là các ngày
+          labels: dataDay.map((item) => `${item.day}`), // Trục X là các ngày
           datasets: [
             {
-              label: "Doanh thu (triệu VND)",
-              data: monthData.map((item) => item.revenue), // Dữ liệu doanh thu theo ngày
-			  backgroundColor: "rgba(4, 0, 255, 0.6)",
-              borderColor: "rgba(4, 0, 255, 0.6)",
-              borderWidth: 1,
-            },
-          ],
-        }
-      : {
-          labels: dayData.map((item) => item.hour), // Trục X là các giờ
-          datasets: [
-            {
-              label: "Doanh thu (triệu VND)",
-              data: dayData.map((item) => item.revenue), // Dữ liệu doanh thu theo giờ
+              label: "Doanh thu (Nghìn VND)",
+              data: dataDay.map((item) => item.revenue), // Đổi sang nghìn VND
               backgroundColor: "rgba(4, 0, 255, 0.6)",
               borderColor: "rgba(4, 0, 255, 0.6)",
               borderWidth: 1,
             },
           ],
-        };
+        }
+        : view === "quarter"
+        ? {
+            labels: ["Q1", "Q2", "Q3", "Q4"],
+            datasets: [
+              {
+                label: "Doanh thu (Nghìn VND)",
+                data: dataQuarter,
+                backgroundColor: "rgba(4, 0, 255, 0.6)",
+                borderColor: "rgba(4, 0, 255, 0.6)",
+                borderWidth: 1,
+              },
+            ],
+          }
+        : {};
 
   const options = {
     responsive: true,
@@ -97,23 +179,17 @@ const AdminStatistics = () => {
         position: "bottom",
         text:
           view === "all"
-            ? "Thống kê doanh thu năm 2022"
+            ? `Thống kê doanh thu năm ${selectedYear}`
             : view === "month"
-            ? "Thống kê doanh thu 30 ngày gần đây"
-            : "Thống kê doanh thu trong ngày (24 giờ)",
+            ? `Thống kê doanh thu tháng ${selectedMonth}/${selectedYear}`
+            : `Thống kê doanh thu trong ngày`,
       },
     },
     scales: {
-    //   x: {
-    //     title: {
-    //       display: true,
-    //       text: view === "all" ? "Tháng" : view === "month" ? "Ngày" : "Giờ",
-    //     },
-    //   },
       y: {
         title: {
           display: true,
-          text: "Doanh thu (triệu VND)",
+          text: "Doanh thu (Nghìn VND)",
         },
       },
     },
@@ -122,46 +198,73 @@ const AdminStatistics = () => {
   return (
     <div className="admin-statistics">
       <div className="row">
-			<div className="col-lg-9 bar-chart">
-				<Bar data={data} options={options} />
-			</div>
-			<div className='col-lg-3 thong-ke'>
-				<div className='thong-ke-option'>
-					<h3>Tổng doanh thu</h3>
-					<h2>1000</h2>
-				</div>
-				<div className='thong-ke-option'>
-					<h3>Tổng đơn hàng</h3>
-					<h2>1000</h2>
-				</div>
-				<div className='thong-ke-option'>
-					<h3>Tổng sản phẩm</h3>
-					<h2>1000</h2>
-				</div>
-			</div>
+        <div className="col-lg-9 bar-chart">
+          <Bar data={chartData} options={options} />
+        </div>
+        <div className="col-lg-3 thong-ke">
+          <div className="thong-ke-option">
+            <h3>Tổng doanh thu</h3>
+            <h2>
+              {dataYear.reduce((sum, order) => sum + order.total_price, 0)}.000 đ
+            </h2>
+          </div>
+          <div className="thong-ke-option">
+            <h3>Tổng đơn hàng</h3>
+            <h2>{listOrder.length}</h2>
+          </div>
+          <div className="thong-ke-option">
+            <h3>Tổng sản phẩm</h3>
+            <h2>{listBook.length}</h2>
+          </div>
+        </div>
       </div>
-	  <div className='row'>
-			<div className="col-lg-3 button-statistics">
-				<div className='btn-stt-option'>
-					<button onClick={() => setView("all")} className="btn btn-primary">
-						Thống kê theo năm
-					</button>
-					<input placeholder='nhap vao nam'/>
-				</div>
-				<div className='btn-stt-option'>
-					<button onClick={() => setView("month")} className="btn btn-secondary">
-						Thống kê theo tháng
-					</button>
-					<input placeholder='nhap vao nam'/>
-				</div>
-				<div className='btn-stt-option'>
-					<button onClick={() => setView("day")} className="btn btn-success">
-						Thống kê theo ngày
-					</button>
-					<input placeholder='nhap vao nam'/>
-				</div>
-			</div>
-	  </div>
+      <div className="row">
+        <div className="col-lg-3 button-statistics">
+          <div className="btn-stt-option">
+            <button onClick={() => setView("all")} className="btn btn-primary">
+              Thống kê theo năm
+            </button>
+            <input
+              type="number"
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(e.target.value)}
+              placeholder="Nhập vào năm"
+            />
+          </div>
+          <div className="btn-stt-option">
+            <button onClick={() => setView("month")} className="btn btn-secondary">
+              Thống kê theo tháng
+            </button>
+            <input
+              type="number"
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              placeholder="Nhập vào tháng"
+            />
+          </div>
+          <div className="btn-stt-option">
+            <button onClick={() => setView("quarter")} className="btn btn-success">
+              Thống kê quý
+            </button>
+          </div>
+        </div>
+        <div className='col-lg-9 thong-ke2'>
+          <div className="thong-ke-option">
+            <h3>Tổng Người dùng</h3>
+            <h2>
+              {listUser.length}
+            </h2>
+          </div>
+          <div className="thong-ke-option">
+            <h3>Tổng đơn hàng thành công</h3>
+            <h2>{dataYear.length}</h2>
+          </div>
+          <div className="thong-ke-option">
+            <h3>Tổng sản phẩm đang bán</h3>
+            <h2>{listBookDangBan.length}</h2>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

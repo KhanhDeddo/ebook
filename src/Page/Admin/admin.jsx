@@ -2,12 +2,28 @@ import React, { useEffect, useState } from 'react';
 import './admin.scss';
 import { IoMdCart } from 'react-icons/io';
 import {  getDashboard, getOrderRecent, getUserRecent } from '../../Api/apiAdmin';
+import { fetcOrders } from '../../Api/getListOrder';
 
 export const AdminHome = () => {
 	const [dashboard, setDashboard] = useState(null);
     const [listUserRecent,setlistUserRecent] = useState([]);
     const [listOrderRecent,setlistOrderRecent] = useState([]);
-
+	const [listOrder, setListOrder] = useState([]);
+	const [listOrderFinish, setListOrderFinish] = useState([]);
+	  // Load dữ liệu sách và đơn hàng
+	  useEffect(() => {
+		const loadData = async () => {
+		  const dataOrder = await fetcOrders();
+		  setListOrder(dataOrder);
+		};
+		loadData();
+	  }, []);
+	  // Lọc đơn hàng "Hoàn thành"
+	  useEffect(() => {
+		setListOrderFinish(
+		  listOrder.filter((order) => order.status === "Hoàn thành")
+		);
+	}, [listOrder]);
 	useEffect(() => {
 		const loadDashboard = async () => {
 			const data = await getDashboard();
@@ -55,7 +71,7 @@ export const AdminHome = () => {
 				</div>
 				<div className="stats-card">
 					<h3>Tổng doanh thu hôm nay </h3>
-					<p className="stats-value">{dashboard?.book}</p>
+					<p className="stats-value">{listOrderFinish.reduce((sum, order) => sum + order.total_price, 0)}.000 đ</p>
 				</div>
 				<div className="stats-card">
 					<h3>Tổng người dùng</h3>

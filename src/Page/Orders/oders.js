@@ -77,6 +77,7 @@ const Orders = () => {
         const handleFinish = async (id) => {
             const data = {
                 status: "Hoàn thành",
+                payment_status: "Đã thanh toán",
             };
             try {
                 await updateOrder(id, data); // Gọi API cập nhật trạng thái đơn hàng
@@ -101,7 +102,7 @@ const Orders = () => {
         {
             id: 3,
             name: "Tổng tiền",
-            selector: (row) => row.total_price,
+            selector: (row) => (`${row.total_price}.000 VND`),
             sortable: true,
         },
         {

@@ -50,3 +50,25 @@
         height: 95px;
     }
 }
+.thong-ke2{
+    margin: 10px 0;
+    height: 100%;
+    display: flex;
+    justify-items: center;
+    align-items: center;
+    h3{
+        padding-top: 5px;
+    }
+    h2{
+        padding: 15px;
+    }
+    .thong-ke-option{
+        display: block;
+        justify-items: center;
+        border: 1px solid map.get($theme-color,"main");
+        border-radius: 5px;
+        margin: 8px;
+        width: 70%;
+        height: 100%;
+    }
+}

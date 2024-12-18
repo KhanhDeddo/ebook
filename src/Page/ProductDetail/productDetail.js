@@ -52,7 +52,7 @@ const BookDetails = ({ onCartUpdated }) => {
       try {
         const data = await fetchBookDetails(id);
         setBook(data);
-        setIsOutOfStock(data.status_book!=="Đang bán");
+        setIsOutOfStock(data.status_book!=="Đang bán" || data.stock_quantity < 1);
       } catch (err) {
         console.error("Error fetching book details:", err);
       }
@@ -236,7 +236,7 @@ const BookDetails = ({ onCartUpdated }) => {
               <p>Thể loại: {book.category}</p>
               <p>Tác giả: {book.author}</p>
               <p>Nhà xuất bản: {book.publisher}</p>
-              <p>Giá: {book.price} VND</p>
+              <p>Giá: {book.price}.000 VND</p>
               <p>Ngày xuất bản: {new Date(book.publication_date).toLocaleDateString()}</p>
               <p>Nhà xuất bản: {book.publisher}</p>
               <p>
@@ -262,7 +262,10 @@ const BookDetails = ({ onCartUpdated }) => {
               <div className="input-button">
               <button onClick={() => handleQuantityChange("decrement")}>-</button>
               <input type="text" value={quantity} readOnly />
-              <button onClick={() => handleQuantityChange("increment")}>+</button>
+              <button 
+                onClick={() => handleQuantityChange("increment")}
+                disabled = {quantity >= book.stock_quantity}
+              >+</button>
               </div>
             </div>
             <div>
@@ -328,13 +331,13 @@ const BookDetails = ({ onCartUpdated }) => {
                                               <p>{book.title}</p>
                                             </div>
                                             <div className="col-lg-24">
-                                              <p>{book.price}</p>
+                                              <p>{book.price}.000</p>
                                             </div>
                                             <div className="col-lg-24">
                                               <p>{quantity}</p>
                                             </div>
                                             <div className="col-lg-24">
-                                              <p>{totalPrice}</p>
+                                              <p>{Number(totalPrice)}.000</p>
                                             </div>
                                           </div>
                                       </div>
@@ -399,7 +402,7 @@ const BookDetails = ({ onCartUpdated }) => {
                                       </div>
                                     </label>
                                     <label>
-                                        <h4>Tổng tiền: {totalPrice}0VND</h4>
+                                        <h4>Tổng tiền: {totalPrice}.000VND</h4>
                                     </label>
                                     <div className="modal-actions">
                                         <button

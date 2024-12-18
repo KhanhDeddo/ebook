@@ -344,13 +344,13 @@ export const CartPage = () => {
                                               <p>{book.title}</p>
                                             </div>
                                             <div className="col-lg-24">
-                                              <p>{book.price}</p>
+                                              <p>{book.price}.000</p>
                                             </div>
                                             <div className="col-lg-24">
                                               <p>{item.quantity}</p>
                                             </div>
                                             <div className="col-lg-24">
-                                              <p>{item.price_at_purchase}</p>
+                                              <p>{item.price_at_purchase}.000</p>
                                             </div>
                                           </div>
                                       </div>
