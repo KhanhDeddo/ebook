@@ -197,7 +197,7 @@ const AdminStatistics = () => {
   };
 
   return (
-    <div className="admin-statistics">
+    <div className="statistics">
       <div className="row">
         <div className="col-lg-9 bar-chart">
           <Bar data={chartData} options={options} />
