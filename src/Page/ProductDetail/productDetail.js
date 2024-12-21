@@ -123,7 +123,14 @@ const BookDetails = ({ onCartUpdated }) => {
 
   const handConfirm = async () => {
     try {
-        // Gửi yêu cầu POST tới API để thêm CartItem
+        const requiredFields = ["recipient_name", "recipient_email", "recipient_phone", "shipping_address", "payment_method"];
+        // Kiểm tra từng trường yêu cầu
+        for (let field of requiredFields) {
+          if (!order[field] || order[field].trim() === "") {
+            alert(`Vui lòng nhập đầy đủ thông tin: ${field.replace(/_/g, " ")}!`);
+            return; // Ngừng thực hiện nếu phát hiện trường còn thiếu
+          }
+        }
         await createOrder(order);
         console.log(listOrder.length+1)
         alert("Đơn hàng được đặt thành công.")

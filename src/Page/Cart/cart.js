@@ -179,10 +179,22 @@ export const CartPage = () => {
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault();
+    e.preventDefault(); // Ngăn chặn hành động mặc định của form
+    const requiredFields = ["recipient_name", "recipient_email", "recipient_phone", "shipping_address", "payment_method"];
+    
+    // Kiểm tra từng trường yêu cầu
+    for (let field of requiredFields) {
+      if (!order[field] || order[field].trim() === "") {
+        alert(`Vui lòng nhập đầy đủ thông tin: ${field.replace(/_/g, " ")}!`);
+        return; // Ngừng thực hiện nếu phát hiện trường còn thiếu
+      }
+    }
+  
+    // Nếu tất cả trường hợp lệ, thực hiện đặt hàng
     handConfirm();
-    console.log('Form Data:',order);
+    console.log("Form Data:", order);
   };
+  
 
   const updateQuantityCartItems = async (id_cartItem,newQuantity,new_price_at_purchase) => {
       try{

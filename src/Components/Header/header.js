@@ -93,7 +93,6 @@ const Header = () => {
   };
   useEffect(() => {
     loadListCart();
-  // },);
 },[user]);
   const total = listCartItem.reduce(
     (sum, item) => sum + Number(item.price_at_purchase),
